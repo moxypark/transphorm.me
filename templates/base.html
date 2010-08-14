@@ -18,7 +18,14 @@
 		
 		<div class="wrap" id="content">
 			<div class="container">
-				{% block body %}{% endblock %}
+				{% block pre-content %}{% endblock %}
+				<div class="span-16 border">
+					{% block content %}{% endblock %}
+				</div>
+				
+				<div class="span-8 last" id="sidebar">
+					{% block sidebar %}{% endblock %}
+				</div>
 			</div>
 		</div>
 		
@@ -27,5 +34,9 @@
 				<p>&copy; {% now "Y" %} Moxy Park | Originally built for <a href="http://djangodash.com" rel="external">Django Dash</a></p>
 			</div>
 		</div>
+		
+		{% block javascript %}
+			<script type="text/javascript" src="http://cdn.jquerytools.org/1.2.3/jquery.tools.min.js"></script>
+		{% endblock %}
 	</body>
 </html>

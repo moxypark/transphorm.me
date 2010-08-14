@@ -1,8 +1,1 @@
-transphorm/__init__.pyc
-transphorm/goals/__init__.pyc
-transphorm/goals/admin.pyc
-transphorm/goals/models.pyc
-transphorm/settings.pyc
-transphorm/settings_local.pyc
-transphorm/urls.pyc
-transphorm/settings_local.py
+*.pyc

@@ -3,6 +3,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from transphorm.goals.managers import GoalManager
 
 class Profile(models.Model):
 	GENDER_CHOICES = (
@@ -10,7 +11,7 @@ class Profile(models.Model):
 		('f', 'female'),	
 	)
 	
-	user = models.ForeignKey(User)
+	user = models.ForeignKey(User, unique = True)
 	dob = models.DateField('date of birth', blank = True, null = True)
 	gender = models.CharField(max_length = 1, choices = GENDER_CHOICES, blank = True, null = True)
 	about = models.TextField(blank = True, null = True)
@@ -28,6 +29,7 @@ class Goal(models.Model):
 	description = models.TextField()
 	has_deadline = models.BooleanField('has a deadline')
 	live = models.BooleanField(default = True)
+	objects = GoalManager()
 	
 	def save(self, *args, **kwargs):
 		if not self.slug:

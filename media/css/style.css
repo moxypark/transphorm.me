@@ -1,3 +1,62 @@
 body {
-	padding: 1em auto 1em auto;
+	padding: 1em auto 1em auto; background: #f4f4f4;
+}
+
+h1 {
+	letter-spacing: -0.1em; color: #333; padding-top: 0.5em;
+	font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+h2 {
+	letter-spacing: -0.1em; color: #333;
+	font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.intro {
+	font-family: 'Georgia', 'Times New Roman', serif;
+	font-size: 1.5em;
+}
+
+#header { background: #333; color: #ddd; padding: 5px 0 5px 0; }
+#content { background: #fff; padding-bottom: 1em; }
+#footer { padding-top: 1em; }
+
+h2, h3, h4, h5, h6, p, address, li { margin: 0.5em 0 0.5em 0; }
+ol, ul { margin: 0.5em 0 0.5em 0.5em; padding: 0; }
+blockquote { margin: 0.5em 1em 0.5em 1em; }
+
+#start-form label {
+	font-family: 'Georgia', 'Times New Roman', serif;
+	font-weight: normal; font-size: 1.5em; 
+}
+
+input[type=text], input[type=password],
+input[type=radio], input[type=checkbox],
+textarea, select {
+	font-size: 1em; width: 300px; font-size: 1em;
+	font-family: Arial, Helvetica, sans-serif; padding: 3px;
+}
+input[type=radio], input[type=checkbox] {
+	width: auto; margin-top: -0.5em;
+}
+#start-form textarea { height: 6em; }
+#start-form input[type=submit] {
+	background: #333; color: #fff; font-size: 1.5em; border-width: 0;
+}
+#start-form .error-info { color: #8A1F11; font-weight: bold; margin-top: 0; }
+
+form .field {
+	margin: 0.25em 0 0.25em 0; float: left; width: 100%;
+	padding: 0.25em 0 0.25em 0; border-bottom: 1px dotted #ccc;
+}
+
+form .field ul {
+	list-style-type: none;
+}
+
+#start-form .field ul label { font-size: 1em; }
+
+#sidebar h2 { font-size: 1.5em; font-weight: bold; }
+#sidebar ul {
+	margin: 0; padding: 0; list-style-type: none;
 }

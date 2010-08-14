@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load markup %}
+
+{% block pre-content %}
+	<h1>Your plan to {{ goal.name }}</h1>
+{% endblock pre-content %}
+
+{% block content %}
+	{% if is_wizard %}
+	<p class="intro">
+		Here you can set a few more details about your personal plan,
+		before going on to create milestones, and setup your rewards.
+	</p>
+	{% endif %}
+	
+	<hr />
+	
+	{% if request.user.is_authenticated %}
+		<p>
+			You are logged in as <strong>{{ request.user.username }}</strong>,
+			and are creating a new plan from scratch.
+		</p>
+	{% endif %}
+	
+	<Form id="plan-form" method="post" action="{{ action }}">
+		{% for form in forms %}
+			{% for field in form %}
+				<div class="field">
+					<label for="id_{{ field.html_name }}">
+					{% if field.name == 'live' or field.name == 'allow_copies' %}
+						{{ field }}&nbsp;{{ field.label }}
+					{% else %}
+						{{ field.label }}<br />
+						{% if field.help_text %}
+							<small class="quiet">{{ field.help_text|safe }}</small>
+							<br />
+						{% endif %}
+						{{ field }}
+					{% endif %}
+					</label>
+					
+					{% if field.errors %}
+						<p class="error-info">{{ field.errors|join:', ' }}</p>
+					{% endif %}
+				</div>
+			{% endfor %}
+		{% endfor %}
+		
+		<div>
+			{% csrf_token %}
+			<p><input class="button positive" type="submit" value="Let&rsquo;s go" /></p>
+		</div>
+	</form>
+{% endblock content %}
+
+{% block sidebar %}
+	{% include 'sidebar.inc.html' %}
+{% endblock sidebar %}
+
+{% block javascript %}
+	{{ block.super }}
+	{{ start_form.media }}
+{% endblock javascript %}

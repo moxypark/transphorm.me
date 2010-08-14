@@ -1,13 +1,30 @@
 {% extends 'base.html' %}
 
-{% block body %}
+{% block pre-content %}
 	<h1>If you could change one thing about your life...</h1>
-	
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-		Integer eget eros risus, vitae posuere quam. Praesent nisl
-		eros, mattis vel pretium volutpat, mollis sit amet velit.
+{% endblock pre-content %}
+
+{% block content %}
+	<p class="intro">
+		Transphorm.me helps you make a change in your life, track
+		your progress with <strong>points</strong> and
+		<strong>rewards</strong>, and share your progress with friends.
 	</p>
+	
+	<form id="start-form" method="post" action="{% url start %}">
+		<div>
+			{% for field in start_form %}
+			<label{% if field.errors %} class="error"{% endif %} for="id_{{ field.html_name }}">I want to {{ field }}</label>
+			{% endfor %}
+			
+			<input class="button positive" type="submit" value="Let&rsquo;s go!" />
+			{% csrf_token %}
+		</div>
+		
+		{% for field in start_form %}
+			{% if field.errors %}<p class="error-info">{{ field.errors|join:', ' }}</p>{% endif %}
+		{% endfor %}
+	</form>
 	
 	<p>
 		Sed id leo nunc, sed pellentesque eros. Nunc congue, ligula
@@ -16,4 +33,13 @@
 		pharetra, erat libero bibendum nibh, sit amet tincidunt odio
 		ipsum blandit lectus. Praesent accumsan pharetra tincidunt.
 	</p>
-{% endblock body %}
+{% endblock content %}
+
+{% block sidebar %}
+	{% include 'sidebar.inc.html' %}
+{% endblock sidebar %}
+
+{% block javascript %}
+	{{ block.super }}
+	{{ start_form.media }}
+{% endblock javascript %}

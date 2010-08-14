@@ -16,7 +16,7 @@ class ProfileAdmin(admin.ModelAdmin):
 	date_hierarchy = 'dob'
 
 class GoalAdmin(admin.ModelAdmin):
-	list_display = ('user', 'name', 'slug', 'has_deadline', 'live')
+	list_display = ('name', 'user', 'slug', 'has_deadline', 'live')
 	list_filter = ('live',)
 
 admin.site.register(Profile, ProfileAdmin)
