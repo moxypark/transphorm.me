@@ -13,13 +13,7 @@ urlpatterns = patterns('',
 		{
 			'template': 'home.html'
 		}
-	),
-	url(r'^profile/$', 'django.views.generic.simple.direct_to_template',
-		{
-			'template': 'profile.html'
-		},
-		name = 'profile'
-	),
+	)
 )
 
 urlpatterns += patterns('django.contrib.auth.views',

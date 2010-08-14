@@ -3,8 +3,139 @@
 
 from django import forms
 from django.forms.extras.widgets import SelectDateWidget
+from django.forms.models import modelformset_factory, BaseModelFormSet
 from django.contrib.auth.models import User
-from transphorm.goals.models import Profile, Plan, Goal
+from transphorm.goals.models import Profile, Plan, Goal, Action, Reward, Milestone
+from transphorm.goals.widgets import RadioSelectWithHelpText
+
+class ProfileForm(forms.ModelForm):
+	first_name = forms.RegexField(
+		regex = r"^[a-zA-Z']+$"
+	)
+	
+	last_name = forms.RegexField(
+		regex = r"^[a-zA-Z-']+$"
+	)
+	
+	username = forms.RegexField(
+		regex = r'^[a-z0-9]+$'
+	)
+	
+	password = forms.CharField(
+		widget = forms.PasswordInput,
+		required = False,
+		label = 'Change your password'
+	)
+	
+	password_confirm = forms.CharField(
+		label = 'Confirm your password',
+		widget = forms.PasswordInput,
+		required = False
+	)
+	
+	email = forms.EmailField(
+		label = 'Email address'
+	)
+	
+	twitter = forms.RegexField(
+		regex = r'^[a-z0-9_]+$',
+		required = False
+	)
+	
+	def clean_password_confirm(self):
+		password = self.cleaned_data['password']
+		password_confirm = self.cleaned_data['password_confirm']
+		
+		if password:
+			
+			if password != password_confirm:
+				raise forms.ValidationError('The two passwords don\'t match.')
+			
+		return password_confirm
+	
+	def clean_username(self):
+		username = self.cleaned_data['username']
+		user_id = self.instance.user.pk
+		
+		if User.objects.filter(
+			username__iexact = username
+		).exclude(
+			pk = user_id
+		).count() == 1:
+			raise forms.ValidationError('Sorry, this username is already in use.')
+		
+		return username
+	
+	def clean_email(self):
+		email = self.cleaned_data['email']
+		user_id = self.instance.user.pk
+		
+		if email:
+			if User.objects.filter(
+				email__iexact = email
+			).exclude(
+				pk = user_id
+			).count() == 1:
+				raise forms.ValidationError('This email address is already in use.')
+		else:
+			raise forms.ValidationError('This field is required.')
+			
+		return email
+	
+	def __init__(self, *args, **kwargs):
+		from datetime import date
+		this_year = date.today().year
+		
+		years = range(this_year - 100, this_year - 12)
+		years.reverse()
+		
+		super(ProfileForm, self).__init__(*args, **kwargs)
+		self.fields['about'].label = 'Tell us about yourself'
+		self.fields['public'].label = 'Make my profile public'
+		self.fields['dob'].widget = SelectDateWidget(
+			years = years
+		)
+		
+		self.fields['first_name'].initial = self.instance.user.first_name
+		self.fields['last_name'].initial = self.instance.user.last_name
+		self.fields['username'].initial = self.instance.user.username
+		self.fields['email'].initial = self.instance.user.email
+	
+	def save(self, commit = True):
+		profile = super(ProfileForm, self).save(commit = False)
+		
+		profile.user.username = self.cleaned_data['username']
+		profile.user.first_name = self.cleaned_data['first_name']
+		profile.user.last_name = self.cleaned_data['last_name']
+		
+		if not self.cleaned_data['password'] is None and not self.cleaned_data['password'] == '':
+			profile.user.set_password(
+				self.cleaned_data['password']
+			)
+		
+		profile.user.email = self.cleaned_data['email']
+		
+		if commit:
+			profile.user.save()
+			profile.save()
+	
+	class Meta:
+		model = Profile
+		exclude = ('user',)
+		fields = (
+			'first_name',
+			'last_name',
+			'username',
+			'password',
+			'password_confirm',
+			'email',
+			'public',
+			'dob',
+			'gender',
+			'about',
+			'twitter',
+			'website',
+		)
 
 class StartForm(forms.Form):
 	plan_copy = forms.ModelChoiceField(
@@ -48,12 +179,10 @@ class PlanForm(forms.ModelForm):
 		label = 'I\'m still working on this goal'
 	)
 	
-	deadline = forms.DateField(
-		widget = SelectDateWidget
-	)
-	
 	def __init__(self, *args, **kwargs):
 		super(PlanForm, self).__init__(*args, **kwargs)
+		self.fields['deadline'].widget = SelectDateWidget()
+		
 		if not self.instance.original:
 			del self.fields['live']
 			del self.fields['allow_copies']
@@ -114,7 +243,7 @@ class SignupForm(forms.ModelForm):
 	)
 	
 	username = forms.RegexField(
-		regex = '^[a-z0-9]+$'
+		regex = r'^[a-z0-9]+$'
 	)
 	
 	password = forms.CharField(
@@ -137,12 +266,6 @@ class SignupForm(forms.ModelForm):
 		required = False
 	)
 	
-	dob = forms.DateField(
-		label = 'Date of birth',
-		required = False,
-		help_text = 'This is optional, and isn&rsquo;t shared with anyone'
-	)
-	
 	gender = forms.ChoiceField(
 		label = 'Are you male or female?',
 		choices = (
@@ -160,6 +283,23 @@ class SignupForm(forms.ModelForm):
 		required = False,
 		initial = True
 	)
+	
+	def __init__(self, *args, **kwargs):
+		from datetime import date
+		this_year = date.today().year
+		
+		years = range(this_year - 100, this_year - 12)
+		years.reverse()
+		
+		super(SignupForm, self).__init__(*args, **kwargs)
+		self.fields['dob'].widget = SelectDateWidget(
+			years = years, attrs = {
+				'class': 'date-field'
+			}
+		)
+		self.fields['dob'].label = 'Date of birth'
+		self.fields['dob'].required = False
+		self.fields['dob'].help_text = 'This is optional, and isn&rsquo;t shared with anyone'
 	
 	def clean_password_confirm(self):
 		create_account = self.cleaned_data['create_account'] == 'True'
@@ -249,7 +389,10 @@ class SignupForm(forms.ModelForm):
 			if commit:
 				profile.save()
 		else:
-			profile = self.user.get_profile()
+			try:
+				profile = self.user.get_profile()
+			except Profile.DoesNotExist:
+				profile = Profile(user = self.user)
 			
 		return profile
 	
@@ -273,3 +416,116 @@ class SignupForm(forms.ModelForm):
 	
 	class Media:
 		js = ('js/start-form.js',)
+
+class ActionForm(forms.ModelForm):
+	ACTION_HELP = (
+		'Something simple and positive, that adds a fixed number of points to your total (eg: walked to work).',
+		'Something simple and negative, which deducts a fixed number of points from your total (eg: had a cigarette).',
+		'The more you do something positive, the more points you get (eg: walked <em>x</em> miles today).',
+		'The less you do something negative, the more points you get (eg: ate <em>x</em> unhealthy meales in a week).'
+	)
+	
+	def __init__(self, *args, **kwargs):
+		super(ActionForm, self).__init__(*args, **kwargs)
+		
+		self.fields['kind'].widget = RadioSelectWithHelpText(
+			choices = self.fields['kind'].choices[1:],
+			choice_help_text = self.ACTION_HELP
+		)
+		
+		self.fields['points_multiplier'].required = False
+	
+	class Meta:
+		model = Action
+		exclude = (
+			'plan'
+		)
+	
+	class Media:
+		js = ('js/action-form.js',)
+
+class BaseActionFormSet(BaseModelFormSet):
+	def __init__(self, *args, **kwargs):
+		self.plan = kwargs.pop('plan', None)
+		kwargs['queryset'] = self.plan.actions.all()
+		super(BaseActionFormSet, self).__init__(*args, **kwargs)
+	
+	def _construct_form(self, i, **kwargs):
+		form = super(BaseActionFormSet, self)._construct_form(i, **kwargs)
+		if form.instance:
+			form.instance.plan = self.plan
+
+		return form
+
+ActionFormSet = modelformset_factory(
+	Action, form = ActionForm, formset = BaseActionFormSet,
+	can_delete = True
+)
+
+class RewardForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(RewardForm, self).__init__(*args, **kwargs)
+	
+	class Meta:
+		model = Reward
+		exclude = (
+			'plan'
+		)
+	
+	class Media:
+		js = ('js/reward-form.js',)
+
+class BaseRewardFormSet(BaseModelFormSet):
+	def __init__(self, *args, **kwargs):
+		self.plan = kwargs.pop('plan', None)
+		kwargs['queryset'] = self.plan.rewards.all()
+		super(BaseRewardFormSet, self).__init__(*args, **kwargs)
+	
+	def _construct_form(self, i, **kwargs):
+		form = super(BaseRewardFormSet, self)._construct_form(i, **kwargs)
+		if form.instance:
+			form.instance.plan = self.plan
+		
+		return form
+
+RewardFormSet = modelformset_factory(
+	Reward, form = RewardForm, formset = BaseRewardFormSet,
+	can_delete = True
+)
+
+class MilestoneForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(MilestoneForm, self).__init__(*args, **kwargs)
+		self.fields['deadline'].widget = SelectDateWidget(
+			attrs = {
+				'class': 'date-field'
+			}
+		)
+	
+	class Meta:
+		model = Milestone
+		exclude = (
+			'plan',
+			'reached'
+		)
+	
+	class Media:
+		js = ('js/milestone-form.js',)
+
+class BaseMilestoneFormSet(BaseModelFormSet):
+	def __init__(self, *args, **kwargs):
+		self.plan = kwargs.pop('plan', None)
+		kwargs['queryset'] = self.plan.milestones.all()
+		super(BaseMilestoneFormSet, self).__init__(*args, **kwargs)
+	
+	def _construct_form(self, i, **kwargs):
+		form = super(BaseMilestoneFormSet, self)._construct_form(i, **kwargs)
+		if form.instance:
+			form.instance.plan = self.plan
+		
+		return form
+
+MilestoneFormSet = modelformset_factory(
+	Milestone, form = MilestoneForm, formset = BaseMilestoneFormSet,
+	can_delete = True
+)

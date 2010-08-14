@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load markup %}
+
+{% block pre-content %}
+	<h1>Rewards to help you <span class="goal-name">{{ goal.name }}</span></h1>
+	{{ block.super }}
+{% endblock pre-content %}
+
+{% block content %}
+	{% if is_wizard %}
+	<p class="intro">
+		When you work positively towards your goal, you earn points
+		which you can redeem. Setup your own <span>rewards</span> system,
+		based on treats or trinkets you&rsquo;d like to receive, and the
+		number of points you think you should attain in order to get
+		them.
+	</p>
+	{% endif %}
+	
+	<hr />
+	
+	<Form id="rewards-form" method="post" action="{{ action }}">
+		{% for form in formset.forms %}
+			<div class="edit-reward{% if forloop.last %} last{% endif %}">
+				<h3>{% spaceless %}
+				{% if form.instance.pk %}
+					<a href="javascript:;">
+						<span class="points">{{ form.instance.points }} point{{ form.instance.points|pluralize }}</span>
+						<span>{{ form.instance }}</span>
+					</a>
+				{% else %}
+					<span>New reward</span>
+				{% endif %}
+				{% endspaceless %}</h3>
+				
+				<div class="panel">
+					{% if not forloop.last %}
+					<label>{{ form.DELETE }}&nbsp; Delete</label>
+					{% endif %}
+					
+					{% for field in form.visible_fields %}
+						{% ifnotequal field.name 'DELETE' %}
+						<div class="field">
+							<label for="id_{{ field.html_name }}">
+							{{ field.label }}<br />
+							{% if field.help_text %}
+								<small class="quiet">{{ field.help_text|safe }}</small>
+								<br />
+							{% endif %}
+							{{ field }}
+							</label>
+					
+							{% if field.errors %}
+								<p class="error-info">{{ field.errors|join:', ' }}</p>
+							{% endif %}
+						</div>
+						{% endifnotequal %}
+					{% endfor %}
+					
+					{{ form.hidden_fields|join:'' }}
+				</div>
+			</div>
+		{% endfor %}
+		
+		<div>
+			{% csrf_token %}
+			{{ formset.management_form }}
+			<input type="hidden" name="next" value="{{ next }}" />
+			<p>
+				<input class="button positive" type="submit" name="save" value="Save and add another" />
+				<input class="button positive" type="submit" name="continue" value="Save and continue" />
+			</p>
+		</div>
+	</form>
+{% endblock content %}
+
+{% block sidebar %}
+	{% include 'plan/sidebar.inc.html' %}
+{% endblock sidebar %}
+
+{% block javascript %}
+	{{ block.super }}
+	{{ formset.media }}
+{% endblock javascript %}

@@ -6,8 +6,14 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from transphorm.goals.forms import StartForm, PlanForm, GoalForm, SignupForm
-from transphorm.goals.models import Goal, Plan
+from transphorm.goals.forms import ProfileForm, StartForm, PlanForm, GoalForm, SignupForm, ActionFormSet, RewardFormSet, MilestoneFormSet
+from transphorm.goals.models import Profile, Goal, Plan
+
+GREETINGS = (
+	'Good to have you back, <span>%s</span>!',
+	'How are you getting on, <span>%s</span>?',
+	'You&rsquo;re looking well, <span>%s</span>!',
+)
 
 def start(request):
 	start_form = StartForm(request.POST)
@@ -202,6 +208,41 @@ def start_plan(request, goal):
 	)
 
 @login_required
+def profile(request):
+	try:
+		profile = request.user.get_profile()
+	except Profile.DoesNotExist:
+		profile = Profile(user = request.user)
+	
+	if request.method == 'GET':
+		form = ProfileForm(instance = profile)
+	else:
+		form = ProfileForm(request.POST, instance = profile)
+		if form.is_valid():
+			profile = form.save()
+			request.user.message_set.create(
+				message = 'Your profile has been updated.'
+			)
+	
+	import random
+	rnd = random.randrange(0, len(GREETINGS))
+	if not 'greeting' in request.session:
+		greeting = GREETINGS[rnd] % request.user.first_name or request.user.username
+		request.session['greeting'] = greeting
+		request.session.modified = True
+	else:
+		greeting = request.session['greeting']
+	
+	return render_to_response(
+		'profile.html',
+		{
+			'profile_form': form,
+			'greeting': greeting
+		},
+		RequestContext(request)
+	)
+
+@login_required
 def edit_plan(request, goal):
 	try:
 		goal = Goal.objects.get(slug = goal)
@@ -257,11 +298,143 @@ def actions_edit(request, goal):
 			reverse('start_plan', args = [goal.slug])
 		)
 	
+	is_wizard = False
+	if plan.actions.count() == 0:
+		next = reverse('rewards_edit', args = [goal.slug])
+		is_wizard = True
+	else:
+		next = request.REQUEST.get(
+			'next', reverse('edit_plan', args = [goal.slug])
+		)
+	
+	if request.method == 'GET':
+		formset = ActionFormSet(plan = plan)
+	else:
+		formset = ActionFormSet(request.POST, plan = plan)
+		
+		if formset.is_valid():
+			formset.save()
+			
+			if 'continue' in request.POST:
+				request.user.message_set.create(
+					message = 'Actions for this plan have been updated.'
+				)
+				
+				return HttpResponseRedirect(next)
+			else:
+				formset = ActionFormSet(plan = plan)
+	
 	return render_to_response(
-		'plan/actions/edit.html',
+		'plan/actions.html',
 		{
 			'goal': goal,
-			'plan': plan
+			'plan': plan,
+			'formset': formset,
+			'next': next,
+			'is_wizard': is_wizard
+		},
+		RequestContext(request)
+	)
+
+@login_required
+def rewards_edit(request, goal):
+	goal = get_object_or_404(
+		Goal, slug = goal
+	)
+	
+	try:
+		plan = goal.plans.filter(user = request.user).latest()
+	except Plan.DoesNotExist:
+		return HttpResponseRedirect(
+			reverse('start_plan', args = [goal.slug])
+		)
+	
+	is_wizard = False
+	if plan.rewards.count() == 0:
+		is_wizard = True
+		next = request.REQUEST.get(
+			'next', reverse('milestones_edit', args = [goal.slug])
+		)
+	else:
+		next = request.REQUEST.get(
+			'next', reverse('edit_plan', args = [goal.slug])
+		)
+	
+	if request.method == 'GET':
+		formset = RewardFormSet(plan = plan)
+	else:
+		formset = RewardFormSet(request.POST, plan = plan)
+		
+		if formset.is_valid():
+			formset.save()
+			
+			if 'continue' in request.POST:
+				request.user.message_set.create(
+					message = 'Rewards for this plan have been updated.'
+				)
+				
+				return HttpResponseRedirect(next)
+			else:
+				formset = RewardFormSet(plan = plan)
+
+	return render_to_response(
+		'plan/rewards.html',
+		{
+			'goal': goal,
+			'plan': plan,
+			'formset': formset,
+			'next': next,
+			'is_wizard': is_wizard
+		},
+		RequestContext(request)
+	)
+
+@login_required
+def milestones_edit(request, goal):
+	goal = get_object_or_404(
+		Goal, slug = goal
+	)
+	
+	try:
+		plan = goal.plans.filter(user = request.user).latest()
+	except Plan.DoesNotExist:
+		return HttpResponseRedirect(
+			reverse('start_plan', args = [goal.slug])
+		)
+	
+	is_wizard = False
+	if plan.milestones.count() == 0:
+		is_wizard = True
+	
+	next = request.REQUEST.get(
+		'next', reverse('edit_plan', args = [goal.slug])
+	)
+	
+	if request.method == 'GET':
+		formset = MilestoneFormSet(plan = plan)
+	else:
+		formset = MilestoneFormSet(request.POST, plan = plan)
+		
+		if formset.is_valid():
+			formset.save()
+			
+			if 'continue' in request.POST:
+				request.user.message_set.create(
+					message = 'Milestones for this plan have been updated.'
+				)
+				
+				return HttpResponseRedirect(next)
+			else:
+				formset = MilestoneFormSet(plan = plan)
+	
+	return render_to_response(
+		'plan/milestones.html',
+		{
+			'goal': goal,
+			'plan': plan,
+			'formset': formset,
+			'next': next,
+			'is_wizard': is_wizard
 		},
 		RequestContext(request)
 	)

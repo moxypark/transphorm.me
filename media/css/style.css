@@ -7,8 +7,6 @@ h1 {
 	font-family: 'Georgia', 'Times New Roman', serif;
 }
 
-h1 span { color: #99317A; }
-
 h2 {
 	letter-spacing: -0.1em; color: #333;
 	font-family: 'Georgia', 'Times New Roman', serif;
@@ -18,6 +16,8 @@ h2 {
 	font-family: 'Georgia', 'Times New Roman', serif;
 	font-size: 1.5em;
 }
+
+h1 span, h2 span, .intro span { color: #99317A; }
 
 #header { background: #333; color: #bbb; padding: 5px 0 5px 0; }
 #header a { color: #ddd; text-decoration: none; }
@@ -47,9 +47,11 @@ textarea { height: 6em; }
 input[type=submit] {
 	background: #333; color: #fff; font-size: 1.5em; border-width: 0;
 }
-#start-form .error-info { color: #8A1F11; font-weight: bold; margin-top: 0; }
+.error-info { color: #8A1F11; font-weight: bold; margin-top: 0; }
 
-label[for=id_deadline] select { width: auto; }
+label[for=id_deadline] select, label[for=id_dob] select, select.date-field {
+	width: auto;
+}
 
 form .field {
 	margin: 0.25em 0 0.25em 0; float: left; width: 100%;
@@ -61,6 +63,35 @@ form .field ul {
 }
 
 #start-form .field ul label { font-size: 1em; }
+
+#action-form h3, #rewards-form h3, #milestones-form h3 {
+	background: #FFA5DA; border: 1px solid #ccc;
+	margin-bottom: 0; font-size: 1em; font-weight: bold;
+	float: left; width: 578px;
+}
+#action-form h3 a, #rewards-form h3 a, #milestones-form h3 a {
+	color: #000; text-decoration: none;
+}
+#action-form h3 span, #rewards-form h3 span, #milestones-form h3 span {
+	padding: 5px; display: block;
+}
+#action-form h3 span.points, #rewards-form h3 span.points,
+#milestones-form h3 span.deadline {
+	float: right; display: inline-block; font-weight: normal;
+}
+#action-form h3 a:hover, #rewards-form h3 a:hover,
+#milestones-form h3 a:hover {
+	text-decoration: underline;
+}
+#action-form .edit-action .panel,
+#rewards-form .edit-reward .panel,
+#milestones-form .edit-milestone .panel {
+	padding: 5px; border: 1px solid #ccc; border-top-width: 0;
+	float: left; width: 568px; background: #fff; clear: both;
+}
+
+#milestones-form .edit-milestone.past h3 { background: #f4f4f4; }
+#milestones-form .edit-milestone.past h3 a { color: #999; }
 
 #sidebar h2 { font-size: 1.5em; font-weight: bold; }
 #sidebar ul {

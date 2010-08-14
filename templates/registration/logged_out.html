@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block pre-content %}
+	<h1>Logged out</h1>
+{% endblock pre-content %}
+
+{% block content %}
+	<p>
+		You&rsquo;ve been logged out.<br />
+		<a href="{% url login %}">Login again</a>?
+	</p>
+{% endblock content %}
