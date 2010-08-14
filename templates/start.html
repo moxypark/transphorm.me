@@ -2,7 +2,8 @@
 {% load markup %}
 
 {% block pre-content %}
-	<h1>Let&rsquo;s help you {{ goal.name }}</h1>
+	<h1>Let&rsquo;s help you <span class="goal-name">{{ goal.name }}</span></h1>
+	{{ block.super }}
 {% endblock pre-content %}
 
 {% block content %}
@@ -13,10 +14,6 @@
 	</div>
 	
 	<hr />
-	
-	{% if request.user.is_authenticated %}
-		<p>You are logged in as <strong>{{ request.user.username }}</strong>.</p>
-	{% endif %}
 	
 	<Form id="start-form" method="post" action="{{ action }}">
 		{% for form in forms %}
@@ -40,6 +37,10 @@
 					{% endif %}
 				</div>
 			{% endfor %}
+			
+			{% if form.non_field_errors %}
+				<p class="error-info">{{ form.non_field_errors|join:'<br />' }}</p>
+			{% endif %}
 		{% endfor %}
 		
 		<div>

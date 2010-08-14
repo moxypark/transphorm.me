@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block pre-content %}
+	<h1>Login to your account</h1>
+{% endblock pre-content %}
+
+{% block content %}
+	<form method="post" action="{% url login %}">
+		{% for field in form %}
+			<div>
+				<label>
+					{{ field.label }}<br />
+					{{ field }}
+				</label>
+			</div>
+		{% endfor %}
+		
+		{% if form.non_field_errors %}
+			<p class="error-info">{{ form.non_field_errors|join:'<br />' }}</p>
+		{% endif %}
+		
+		<div>
+			{% csrf_token %}
+			<input type="submit" class="button positive" value="Login" />
+		</div>
+	</form>
+{% endblock content %}
+
+{% block sidebar %}
+	<h2>Don&rsquo;t have an account?</h2>
+	<p>
+		<a href="/">Pick a goal that you&rdquo;d like to achieve</a>
+	</p>
+	
+	{% include 'sidebar.inc.html' %}
+{% endblock sidebar %}
+
+{% block javascript %}
+	{{ block.super }}
+	{{ start_form.media }}
+{% endblock javascript %}

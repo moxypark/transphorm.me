@@ -1,0 +1,19 @@
+<h2>Your plan to <span>{{ plan.goal }}</span></h2>
+
+<ul>
+	<li>
+		<a href="{% url edit_plan plan.goal.slug %}">Plan details</a>
+	</li>
+	
+	<li>
+		<a href="{% url actions_edit plan.goal.slug %}">Actions</a>
+	</li>
+	
+	<li>
+		<a href="{% url rewards_edit plan.goal.slug %}">Rewards</a>
+	</li>
+	
+	<li>
+		<a href="{% url milestones_edit plan.goal.slug %}">Milestones</a>
+	</li>
+</ul>

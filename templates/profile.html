@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block pre-content %}
+	<h1>Good to have you back, <span>{{ request.user.first_name|default:request.user }}</span>!</h1>
+{% endblock pre-content %}
+
+{% block content %}
+	<form method="post" action="">
+		{% for field in profile_form %}
+			<div class="field">
+				<label for="id_{{ field.html_name }}">
+				{% if field.name == 'public' or field.name == 'has_deadline' %}
+					{{ field }}&nbsp;{{ field.label }}
+				{% else %}
+					{{ field.label }}<br />
+					{% if field.help_text %}
+						<small class="quiet">{{ field.help_text|safe }}</small>
+						<br />
+					{% endif %}
+					{{ field }}
+				{% endif %}
+				</label>
+				
+				{% if field.errors %}
+					<p class="error-info">{{ field.errors|join:', ' }}</p>
+				{% endif %}
+			</div>
+		{% endfor %}
+		
+		{% if form.non_field_errors %}
+			<p class="error-info">{{ form.non_field_errors|join:'<br />' }}</p>
+		{% endif %}
+	
+		<div>
+			{% csrf_token %}
+			<p><input class="button positive" type="submit" value="Update profile" /></p>
+		</div>
+	</form>
+{% endblock content %}
+
+{% block sidebar %}
+	{% include 'profile/sidebar.inc.html' %}
+{% endblock sidebar %}

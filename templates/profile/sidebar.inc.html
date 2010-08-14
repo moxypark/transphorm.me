@@ -1,0 +1,7 @@
+{% ifequal user_plans.count 0 %}
+	{% include 'sidebar.inc.html' %}
+{% else %}
+	{% for plan in user_plans %}
+		{% include 'plan/sidebar.inc.html' %}
+	{% endfor %}
+{% endifequal %}

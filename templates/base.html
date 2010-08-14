@@ -8,22 +8,42 @@
 		<!--[if lt IE 8]><link rel="stylesheet" href="{{ MEDIA_URL }}css/blueprint/ie.css" type="text/css" media="screen, projection" /><![endif]-->
 		<link rel="stylesheet" href="{{ MEDIA_URL }}css/style.css" type="text/css" media="screen, projection" />
 	</head>
-
+	
 	<body>
 		<div class="wrap" id="header">
 			<div class="container">
-				<span class="site-name">transphorm.me</span>
+				<div class="span-4">
+					<a class="site-name" href="/">transphorm.me</a>
+				</div>
+				
+				<div class="span-5 prepend-11 last">
+					{% if request.user.is_authenticated %}
+					Logged in as <a href="{% url profile %}">{{ request.user.username }}</a>
+					|
+					<a href="{% url logout %}">Logout</a>
+					{% else %}
+					You&rsquo;re not logged in |
+					<a href="{% url login %}">Login</a>
+					{% endif %}
+				</div>
 			</div>
 		</div>
 		
 		<div class="wrap" id="content">
 			<div class="container">
+				{% if messages %}
+					<div class="success flash">
+						{{ messages|join:'<br />' }}
+					</div>
+				{% endif %}
+				
 				{% block pre-content %}{% endblock %}
-				<div class="span-16 border">
+				
+				<div class="span-15 border">
 					{% block content %}{% endblock %}
 				</div>
 				
-				<div class="span-8 last" id="sidebar">
+				<div class="span-9 last" id="sidebar">
 					{% block sidebar %}{% endblock %}
 				</div>
 			</div>
@@ -31,12 +51,20 @@
 		
 		<div class="wrap" id="footer">
 			<div class="container">
-				<p>&copy; {% now "Y" %} Moxy Park | Originally built for <a href="http://djangodash.com" rel="external">Django Dash</a></p>
+				<p>&copy; {% now "Y" %} <a href="http://moxypark.co.uk" rel="external">Moxy Park</a> | Originally built for <a href="http://djangodash.com" rel="external">Django Dash</a></p>
 			</div>
 		</div>
 		
 		{% block javascript %}
 			<script type="text/javascript" src="http://cdn.jquerytools.org/1.2.3/jquery.tools.min.js"></script>
+			<script type="text/javascript">
+				setTimeout(
+					function() { 
+						$('.success.flash').slideUp();
+					},
+					2000
+				);
+			</script>
 		{% endblock %}
 	</body>
 </html>

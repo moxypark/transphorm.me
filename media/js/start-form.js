@@ -18,14 +18,22 @@ $(document).ready(
 		
 		$('input[type=radio][name=signup-create_account]').bind('change',
 			function(e) {
-				new_user = $(this).val() == 'True';
-				$('label[for=id_signup-password_confirm]').slideToggle();
-				$('label[for=id_signup-email]').slideToggle();
-				$('label[for=id_signup-email_confirm]').slideToggle();
-				$('label[for=id_signup-dob]').slideToggle();
-				$('label[for=id_signup-gender]').slideToggle();
-				$('label[for=id_signup-public]').slideToggle();
+				$('label[for=id_signup-password_confirm]').parent().slideToggle();
+				$('label[for=id_signup-email]').parent().slideToggle();
+				$('label[for=id_signup-email_confirm]').parent().slideToggle();
+				$('label[for=id_signup-dob]').parent().slideToggle();
+				$('label[for=id_signup-gender]').parent().slideToggle();
+				$('label[for=id_signup-public]').parent().slideToggle();
 			}
 		);
+		
+		if($('input[type=radio][name=signup-create_account][value=False]').attr('checked') == true) {
+			$('label[for=id_signup-password_confirm]').parent().hide();
+			$('label[for=id_signup-email]').parent().hide();
+			$('label[for=id_signup-email_confirm]').parent().hide();
+			$('label[for=id_signup-dob]').parent().hide();
+			$('label[for=id_signup-gender]').parent().hide();
+			$('label[for=id_signup-public]').parent().hide();
+		}
 	}
 );
