@@ -2,14 +2,7 @@
 {% load markup %}
 
 {% block pre-content %}
-	<h1>Your plan to <span class="goal-name">{{ goal.name }}</span></h1>
-	{% if not plan.pk %}
-	<p>
-		You&rsquo;ve not started this plan before.<br />
-		To get going, just fill in a few details and click <strong>Save</strong>.
-	</p>
-	{% endif %}
-	
+	<h1>Actions to help you <span class="goal-name">{{ goal.name }}</span></h1>
 	{{ block.super }}
 {% endblock pre-content %}
 

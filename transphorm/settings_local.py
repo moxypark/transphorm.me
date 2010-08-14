@@ -6,7 +6,7 @@ from os import path
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': 'transphorm',
+		'NAME': 'transphorm.sql',
 		'USER': '',
 		'PASSWORD': '',
 		'HOST': '',

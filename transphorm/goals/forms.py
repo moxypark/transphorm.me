@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from django import forms
+from django.forms.extras.widgets import SelectDateWidget
 from django.contrib.auth.models import User
 from transphorm.goals.models import Profile, Plan, Goal
 
@@ -47,13 +48,20 @@ class PlanForm(forms.ModelForm):
 		label = 'I\'m still working on this goal'
 	)
 	
+	deadline = forms.DateField(
+		widget = SelectDateWidget
+	)
+	
 	def __init__(self, *args, **kwargs):
 		super(PlanForm, self).__init__(*args, **kwargs)
 		if not self.instance.original:
 			del self.fields['live']
 			del self.fields['allow_copies']
 		
-		self.fields['deadline'].required = self.instance.goal.has_deadline
+		if not self.instance.goal.has_deadline:
+			self.fields['deadline'].required = False
+			self.fields['deadline'].help_text = """You don&rsquo;t have to set a deadline
+			for this goal, but it can be helpful"""
 	
 	class Meta:
 		model = Plan
@@ -115,15 +123,18 @@ class SignupForm(forms.ModelForm):
 	
 	password_confirm = forms.CharField(
 		label = 'Confirm your password',
-		widget = forms.PasswordInput
+		widget = forms.PasswordInput,
+		required = False
 	)
 	
 	email = forms.EmailField(
-		label = 'Email address'
+		label = 'Email address',
+		required = False
 	)
 	
 	email_confirm = forms.EmailField(
-		label = 'Confirm your eemail address'
+		label = 'Confirm your eemail address',
+		required = False
 	)
 	
 	dob = forms.DateField(
@@ -177,8 +188,11 @@ class SignupForm(forms.ModelForm):
 		email = self.cleaned_data['email']
 		
 		if create_account:
-			if User.objects.filter(email__iexact = email).count() == 1:
-				raise forms.ValidationError('This email address is already in use.')
+			if email:
+				if User.objects.filter(email__iexact = email).count() == 1:
+					raise forms.ValidationError('This email address is already in use.')
+			else:
+				raise forms.ValidationError('This field is required.')
 			
 		return email
 	
@@ -191,7 +205,7 @@ class SignupForm(forms.ModelForm):
 			
 			if email != email_confirm:
 				raise forms.ValidationError('The two email addresses don\'t match.')
-
+		
 		return email_confirm
 	
 	def clean(self):
@@ -200,12 +214,12 @@ class SignupForm(forms.ModelForm):
 			from django.contrib.auth import authenticate
 			
 			user = authenticate(
-				username = self.cleaned_data['username'],
-				password = self.cleaned_data['password']
+				username = self.cleaned_data.get('username'),
+				password = self.cleaned_data.get('password')
 			)
 			
 			if not user:
-				raise forms.ValidationError('The username and password entered do not match.')
+				raise forms.ValidationError('Please enter a correct username and password. Note that both fields are case-sensitive.')
 			
 			self.user = user
 		

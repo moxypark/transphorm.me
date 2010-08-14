@@ -14,10 +14,17 @@ urlpatterns = patterns('',
 			'template': 'home.html'
 		}
 	),
-	url(r'^start/$', 'transphorm.goals.views.start', name = 'start'),
-	url(r'^new/start/$', 'transphorm.goals.views.new_goal', name = 'new_goal'),
-	url(r'^(?P<goal>[\w-]+)/start/$', 'transphorm.goals.views.start_plan', name = 'start_plan'),
-	url(r'^(?P<username>[\w-]+)(?P<goal>[\w-]+)/start/$', 'transphorm.goals.views.copy_plan', name = 'copy_plan'),
+	url(r'^profile/$', 'django.views.generic.simple.direct_to_template',
+		{
+			'template': 'profile.html'
+		},
+		name = 'profile'
+	),
+)
+
+urlpatterns += patterns('django.contrib.auth.views',
+	url(r'^login/$', 'login', name = 'login'),
+	url(r'^logout/$', 'logout', name = 'logout'),
 )
 
 if getattr(settings, 'DEBUG', False):
@@ -28,3 +35,7 @@ if getattr(settings, 'DEBUG', False):
 			}
 		)
 	)
+	
+urlpatterns += patterns('',
+	url(r'^', include('transphorm.goals.urls')),
+)

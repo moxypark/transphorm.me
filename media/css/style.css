@@ -7,6 +7,8 @@ h1 {
 	font-family: 'Georgia', 'Times New Roman', serif;
 }
 
+h1 span { color: #99317A; }
+
 h2 {
 	letter-spacing: -0.1em; color: #333;
 	font-family: 'Georgia', 'Times New Roman', serif;
@@ -17,7 +19,9 @@ h2 {
 	font-size: 1.5em;
 }
 
-#header { background: #333; color: #ddd; padding: 5px 0 5px 0; }
+#header { background: #333; color: #bbb; padding: 5px 0 5px 0; }
+#header a { color: #ddd; text-decoration: none; }
+#header a:hover { color: #fff; text-decoration: underline; }
 #content { background: #fff; padding-bottom: 1em; }
 #footer { padding-top: 1em; }
 
@@ -39,11 +43,13 @@ textarea, select {
 input[type=radio], input[type=checkbox] {
 	width: auto; margin-top: -0.5em;
 }
-#start-form textarea { height: 6em; }
-#start-form input[type=submit] {
+textarea { height: 6em; }
+input[type=submit] {
 	background: #333; color: #fff; font-size: 1.5em; border-width: 0;
 }
 #start-form .error-info { color: #8A1F11; font-weight: bold; margin-top: 0; }
+
+label[for=id_deadline] select { width: auto; }
 
 form .field {
 	margin: 0.25em 0 0.25em 0; float: left; width: 100%;
@@ -60,3 +66,5 @@ form .field ul {
 #sidebar ul {
 	margin: 0; padding: 0; list-style-type: none;
 }
+#sidebar a:link, #sidebar a:visited { color: #99317A; }
+#sidebar a:hover { color: #000; }
