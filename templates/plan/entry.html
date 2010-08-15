@@ -10,8 +10,26 @@
 {% block content %}
 	<div id="log">
 		<hr />
+		
+		{% ifequal request.user plan.user %}
+		<small>Social tools are only available to you.</small>
+		<ul id="social-cations">
+			<li>
+				<a href="http://twitter.com/share" class="twitter-share-button" data-count="none" data-via="{{ profile.twitter }}" data-related="transphormme">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+			</li>
+			<li>
+				<iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Flocalhost%3A8000%2Flose-weight%2Fmarksteadman%2F2%2F&amp;layout=standard&amp;show_faces=false&amp;width=450&amp;action=like&amp;colorscheme=light&amp;height=23" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:23px;"></iframe>
+			</li>
+		</ul>
+		
+		<hr />
+		{% endifequal %}
+		
 		<h2>{{ entry.get_kind_display }} for <span>{{ entry.plan.goal }}</strong></h2>
+			
+		{% with 'True' as solo %}
 		{% include 'plan/entry.inc.html' %}
+		{% endwith %}
 		
 		{% ifequal entry.kind 'a' %}
 			<p>
@@ -30,9 +48,13 @@
 				<a class="button delete" href="{% url plan_logbook_entry_delete plan.goal.slug plan.user.username entry.pk %}">Delete this entry</a>
 				{% ifequal entry.kind 'a' %}
 				Deleting this entry will deduct
-				<strong>{{ entry.actionentry.action.points }} points</strong>
+				<strong>{{ entry.actionentry.points_value }} points</strong>
 				from your total
 				{% endifequal %}
+				
+				{% if entry.kind == 'c' and not entry.comment.is_approved %}
+					<a class="button positive" href="{% url plan_logbook_entry_approve plan.goal.slug plan.user.username entry.pk %}">Approve it</a>
+				{% endif %}
 			</p>
 		{% endif %}
 		
@@ -43,3 +65,7 @@
 		</p>
 	</div>
 {% endblock content %}
+
+{% block sidebar %}
+	{% include 'plan/sidebar.inc.html' %}
+{% endblock sidebar %}

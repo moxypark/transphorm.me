@@ -1,6 +1,6 @@
 {% load markup gravatar %}
 
-<div class="log-entry">
+<div class="log-entry{% if not solo %}{% if entry.kind == 'c' and not entry.comment.is_approved %} awaiting-approval{% endif %}{% endif %}">
 	<img src="{% ifequal entry.kind 'c' %}{{ entry.comment.email|gravatar }}{% else %}{{ entry.plan.user.email|gravatar }}{% endifequal %}" alt="{{ entry.plan.user }}" class="gravatar" />
 	<div class="body">
 		{{ entry.body|markdown }}
@@ -20,7 +20,17 @@
 						{{ user.get_full_name|default:user.username }}
 					{% endif %}
 				{% endifequal %}
-			{% endspaceless %}</small>
+			{% endspaceless %}
+			
+			{% if not solo %}
+			{% ifequal plan.user request.user %}
+				{% if entry.kind == 'c' and not entry.comment.is_approved %}
+					| <a class="approve" href="{% url plan_logbook_entry_approve plan.goal.slug plan.user.username entry.pk %}">Approve</a>
+				{% endif %}
+				| <a class="delete" href="{% url plan_logbook_entry_delete plan.goal.slug plan.user.username entry.pk %}">Delete</a>
+			{% endifequal %}
+			{% endif %}
+			</small>
 		</p>
 	</div>
 </div>

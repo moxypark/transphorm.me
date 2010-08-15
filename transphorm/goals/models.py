@@ -3,7 +3,8 @@
 
 from django.db import models
 from django.contrib.auth.models import User
-from transphorm.goals.managers import GoalManager, RewardManager
+from transphorm.goals.managers import GoalManager, RewardManager, \
+	LogEntryManager
 from datetime import date, datetime, timedelta
 
 POINT_CHOICES = tuple([(x, str(x)) for x in range(-100, 110, 10)])
@@ -261,6 +262,8 @@ class LogEntry(models.Model):
 		default = 'l'
 	)
 	
+	objects = LogEntryManager()
+	
 	def __init__(self, *args, **kwargs):
 		super(LogEntry, self).__init__(*args, **kwargs)
 	
@@ -366,11 +369,40 @@ class Comment(LogEntry):
 	name = models.CharField(max_length = 50)
 	website = models.URLField(max_length = 255, null = True, blank = True)
 	email = models.EmailField()
-	is_approved = models.BooleanField(editable = False)
-	is_spam = models.BooleanField(editable = False)
+	is_approved = models.BooleanField()
+	is_spam = models.BooleanField()
+	ip = models.CharField(max_length = 20, editable = False)
+	user_agent = models.CharField(max_length = 255, editable = False)
 	
 	def __init__(self, *args, **kwargs):
 		super(Comment, self).__init__(*args, **kwargs)
 		self.kind = 'c'
+		
+	def save(self, *args, **kwargs):
+		from akismet import Akismet
+		from django.conf import settings
+		
+		if not self.pk:
+			api = Akismet(agent = 'transphorm/akismet 0.1')
+			api.setAPIKey(
+				getattr(settings, 'AKISMET_KEY')
+			)
+			
+			print 'Set API key'
+			
+			data = {
+				'comment_author': self.name,
+				'comment_author_url': self.website,
+				'user_ip': self.ip,
+				'user_agent': self.user_agent
+			}
+			
+			if api.comment_check(self.body, data):
+				print 'Comment is SPAM'
+				self.is_spam = True
+			else:
+				print 'Comment is NOT spam'
+		
+		super(Comment, self).save(*args, **kwargs)
 		
 from transphorm.goals.management import *

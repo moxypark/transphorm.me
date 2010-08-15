@@ -35,6 +35,12 @@
 					<div class="success flash">
 						{{ messages|join:'<br />' }}
 					</div>
+				{% else %}
+					{% if anonymous_messages %}
+						<div class="success flash">
+							{{ anonymous_messages|join:'<br />' }}
+						</div>
+					{% endif %}
 				{% endif %}
 				
 				{% if unclaimed_rewards %}

@@ -82,6 +82,9 @@ blockquote { margin: 0.5em 1em 0.5em 1em; }
 	display: inline-block;
 }
 
+#social-cations { margin: 0; padding: 0; list-style-type: none; }
+#social-cations li { display: block; float: left; margin-right: 10px; }
+
 input[type=text], input[type=password],
 input[type=radio], input[type=checkbox],
 textarea, select {
@@ -159,6 +162,12 @@ form .field ul {
 #log { font-size: 1.25em; }
 
 #log .log-entry { margin-top: 1em; float: left; }
+#log .log-entry.awaiting-approval .gravatar {
+	opacity: .50; filter:alpha(opacity=50); opacity: .50;
+}
+#log .log-entry.awaiting-approval .body {
+	color: #999;
+}
 #log .log-entry .gravatar {
 	width: 50px; display: block; float: left; margin-right: 10px;
 }

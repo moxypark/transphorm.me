@@ -67,3 +67,6 @@ INSTALLED_APPS = (
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/profile/latest/'
 AUTH_PROFILE_MODULE = 'goals.Profile'
+
+AKISMET_KEY = '7b729c6cada1'
+DEFAULT_FROM_EMAIL = 'website@transphorm.me'

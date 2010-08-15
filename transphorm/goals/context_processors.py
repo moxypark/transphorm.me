@@ -13,6 +13,9 @@ def goals(request):
 		'start_form': StartForm()
 	}
 	
+	if request.GET.get('msg'):
+		context['anonymous_messages'] = [request.GET.get('msg')]
+	
 	if request.user.is_authenticated():
 		context['user_plans'] = request.user.plans.filter(live = True)
 		

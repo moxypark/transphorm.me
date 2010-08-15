@@ -1,0 +1,12 @@
+Hi {{ user.get_full_name|default:user.username }}!
+
+Someone has commented on your {{ plan.goal }} progress.
+
+Name: {{ comment.name }}{% if comment.website %}
+Website: {{ comment.website }}
+{% endif %}
+
+{{ comment.body|striptags|safe }}
+
+You can view the comment at
+http://{{ site.domain }}{{ comment.get_absolute_url }}

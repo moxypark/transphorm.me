@@ -446,7 +446,8 @@ def rewards_claim(request, *args, **kwargs):
 		{
 			'reward': reward,
 			'next': request.GET.get('next', request.META.get('HTTP_REFERER')),
-			'unclaimed_rewards': None
+			'unclaimed_rewards': None,
+			'plan': plan
 		},
 		RequestContext(request)
 	)
@@ -535,7 +536,12 @@ def plan_logbook(request, *args, **kwargs):
 			reverse('start_plan', args = [goal])
 		)
 	
-	entries = helpers.paginated(plan.log_entries.all(), request)
+	if request.user != plan.user:
+		entries = plan.log_entries.approved()
+	else:
+		entries = plan.log_entries.not_spam()
+	
+	entries = helpers.paginated(entries, request)
 	
 	if request.user != plan.user:
 		try:
@@ -595,6 +601,24 @@ def plan_logbook_entry(request, *args, **kwargs):
 		LogEntry, plan = plan, pk = pk
 	)
 	
+	if entry.kind == 'c':
+		if not request.user.is_authenticated():
+			if not entry.comment.is_approved:
+				return HttpResponseRedirect(
+					'%s?next=%s' % (
+						reverse('login'),
+						request.path
+					)
+				)
+		elif request.user != plan.user:
+			if not entry.comment.is_approved:
+				return HttpResponseRedirect(
+					'%s?next=%s' % (
+						reverse('login'),
+						request.path
+					)
+				)
+	
 	action = kwargs.get('action')
 	if action == 'delete':
 		entry.delete()
@@ -606,8 +630,25 @@ def plan_logbook_entry(request, *args, **kwargs):
 		return HttpResponseRedirect(
 			reverse('plan_logbook', args = [goal.slug])
 		)
+	elif action == 'approve':
+		entry.comment.is_approved = True
+		entry.comment.is_spam = False
+		entry.comment.save()
+		
+		request.user.message_set.create(
+			message = 'This %s has been approved.' % entry.get_kind_display()
+		)
+		
+		return HttpResponseRedirect(
+			reverse('plan_logbook', args = [goal.slug])
+		)
 	
 	can_delete = request.user == plan.user
+	
+	try:
+		profile = plan.user.get_profile()
+	except Profile.DoesNotExist:
+		profile = None
 	
 	return render_to_response(
 		'plan/entry.html',
@@ -617,7 +658,8 @@ def plan_logbook_entry(request, *args, **kwargs):
 			'user': plan.user,
 			'plan': plan,
 			'goal': goal,
-			'can_delete': can_delete
+			'can_delete': can_delete,
+			'profile': profile
 		},
 		RequestContext(request)
 	)
@@ -676,10 +718,18 @@ def plan_comment_add(request, *args, **kwargs):
 	form = CommentForm(request.POST, instance = comment)
 	
 	if form.is_valid():
-		comment = form.save()
+		comment = form.save(commit = False)
+		comment.ip = request.META.get('REMOTE_HOST')
+		comment.user_agent = request.META.get('USER_AGENT')
+		comment.save()
 		
 		return HttpResponseRedirect(
-			reverse('user_plan_logbook', args = [goal.slug, username])
+			'%s?msg=%s' % (
+				reverse(
+					'user_plan_logbook', args = [goal.slug, plan.user.username]
+				),
+				'Your comment is awaiting approval.'
+			)
 		)
 	
 	return render_to_response(
@@ -687,7 +737,7 @@ def plan_comment_add(request, *args, **kwargs):
 		{
 			'goal': goal,
 			'user': plan.user,
-			'plan': plan,
+			'plan': plan
 		},
 		RequestContext(request)
 	)

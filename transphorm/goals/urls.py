@@ -21,5 +21,6 @@ urlpatterns = patterns('transphorm.goals.views',
 	url(r'^(?P<goal>[\w-]+)/(?P<username>[\w-]+)/$', 'plan_logbook', name = 'user_plan_logbook'),
 	url(r'^(?P<goal>[\w-]+)/(?P<username>[\w-]+)/(?P<id>\d+)/$', 'plan_logbook_entry', name = 'plan_logbook_entry'),
 	url(r'^(?P<goal>[\w-]+)/(?P<username>[\w-]+)/(?P<id>\d+)/delete/$', 'plan_logbook_entry', {'action': 'delete'}, name = 'plan_logbook_entry_delete'),
+	url(r'^(?P<goal>[\w-]+)/(?P<username>[\w-]+)/(?P<id>\d+)/approve/$', 'plan_logbook_entry', {'action': 'approve'}, name = 'plan_logbook_entry_approve'),
 	url(r'^(?P<goal>[\w-]+)/(?P<username>[\w-]+)/comment/$', 'plan_comment_add', name = 'plan_comment_add')
 )

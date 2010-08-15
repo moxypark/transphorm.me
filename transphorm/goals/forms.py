@@ -579,13 +579,15 @@ class CommentForm(LogEntryForm):
 	def __init__(self, *args, **kwargs):
 		super(CommentForm, self).__init__(*args, **kwargs)
 		self.fields['body'].label = 'What would you like to say?'
-
+	
 	class Meta:
 		model = Comment
 		exclude = (
 			'plan',
 			'kind',
-			'date'
+			'date',
+			'is_spam',
+			'is_approved'
 		)
 	
 	class Media:

@@ -11,6 +11,15 @@ class GoalManager(models.Manager):
 			'-plan_count'
 		)
 
+class LogEntryManager(models.Manager):
+	def not_spam(self):
+		q = models.Q(comment__isnull = True) | models.Q(comment__is_spam = False)
+		return self.filter(q)
+	
+	def approved(self):
+		q = models.Q(comment__isnull = True) | models.Q(comment__is_approved = True)
+		return self.not_spam().filter(q)
+
 class RewardManager(models.Manager):
 	def unclaimed(self, user):
 		unclaimed_points = user.plans.filter(live = True).aggregate(
