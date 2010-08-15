@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block pre-content %}
+	<div class="span-15">
+		{% include 'plan/title.inc.html' %}
+	</div>
+{% endblock pre-content %}
+
+{% block content %}
+	{% ifequal user request.user %}
+		{% ifequal plan.log_entries.count 0 %}
+			<p class="intro">
+				This is where you log your progress.
+				{% if profile.public %}As your profile is public, other
+				people will be able to see your progress too.{% endif %}
+			</p>
+		{% endifequal %}
+		<p>
+			If you don&rsquo;t want others to see your progress, you
+			can make your public private, by deselecting the
+			<strong>Make my profile public</strong> option in your
+			<a href="{% url profile %}">profile</a>.
+		</p>
+	{% else %}
+		<p class="intro">
+			This is <span>{{ user.get_full_name|default:user.username }}</span>&rsquo;s
+			logbook, where {{ gender }} updates his progress. You can leave
+			an encouraging comment below.
+		</p>
+	{% endifequal %}
+	
+	<form id="log-form" method="post" action="{{ action }}">
+		{% load content_info %}
+		{% if request.user == user and request.user.is_authenticated %}
+			<ul class="log-options">
+				<li>
+					<a href="#form1" class="selected">Log an action</a>
+				</li>
+				<li>
+					<a href="#form2">Post a comment</a>
+				</li>
+			</ul>
+		{% endif %}
+		
+		{% for form in forms %}
+			{% include 'plan/entry-form.inc.html' %}
+		{% endfor %}
+		
+		{% csrf_token %}
+		
+		{% for field in start_form %}
+			{% if field.errors %}<p class="error-info">{{ field.errors|join:', ' }}</p>{% endif %}
+		{% endfor %}
+	</form>
+	
+	<div id="log">
+		<a id="entries"></a>
+		{% for entry in entries.object_list %}
+			{% include 'plan/entry.inc.html' %}
+		{% endfor %}
+		
+		<div class="page-links">
+			{% if entries.has_next %}
+				<div class="page-next">
+					&lt; <a href="?page={{ entries.next_page_number }}#entries">Older entries</a>
+				</div>
+			{% endif %}
+			{% if entries.has_previous %}
+				<div class="page-prev">
+				{% ifequal entries.previous_page_number 1 %}
+					<a href="{{ request.path }}#entries">Newer entries</a>
+				{% else %}
+					<a href="{{ request.path }}?page={{ entries.previous_page_number }}#entries">Newer entries</a>
+				{% endifequal %} &gt;
+				</div>
+			{% endif %}
+		</div>
+	</div>
+{% endblock content %}
+
+{% block sidebar %}
+	{% include 'plan/sidebar.inc.html' %}
+{% endblock sidebar %}
+
+{% block javascript %}
+	{{ block.super }}
+	
+	{% for form in forms %}
+		{{ form.media }}
+	{% endfor %}
+	
+	<script type="text/javascript">
+		$(document).ready(
+			function() {
+				actions = {{ actions_serialized|safe }};
+				measurements = {{ measurements_serialized|safe }};
+			}
+		);
+	</script>
+	
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/logbook.js"></script>
+{% endblock javascript %}

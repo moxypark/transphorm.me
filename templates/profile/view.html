@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load markup %}
+
+{% block pre-content %}
+	<h1>{{ profile }}&rsquo;s profile</h1>
+{% endblock pre-content %}
+
+{% block content %}
+	{% if profile.about %}
+		<h2>About {{ profile }}</h2>
+		{{ profile.about|markdown }}
+	{% endif %}
+	
+	{% if profile.twitter or profile.website %}
+		<p>
+			Find me
+			{% if profile.twitter %}
+				<a href="http://twitter.com/{{ profile.twitter }}/" rel="external">Twitter</a>
+				{% if profile.website %}or{% endif %}
+			{% endif %}
+			
+			{% if profile.website %}
+			at <a href="{{ profile.website }}" rel="external">{{ profile.website }}</a>
+			{% endif %}
+		</p>
+	{% endif %}
+	
+	{% for plan in profile.live_plans %}
+		{% include 'profile/plan.inc.html' %}
+	{% endfor %}
+{% endblock content %}
+
+{% block sidebar %}
+	{% include 'sidebar.inc.html' %}
+{% endblock sidebar %}

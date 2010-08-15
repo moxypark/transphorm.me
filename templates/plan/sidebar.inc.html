@@ -2,18 +2,10 @@
 
 <ul>
 	<li>
-		<a href="{% url edit_plan plan.goal.slug %}">Plan details</a>
-	</li>
-	
-	<li>
-		<a href="{% url actions_edit plan.goal.slug %}">Actions</a>
-	</li>
-	
-	<li>
-		<a href="{% url rewards_edit plan.goal.slug %}">Rewards</a>
-	</li>
-	
-	<li>
+		<a href="{% url plan_logbook plan.goal.slug %}">Logbook</a>&nbsp;
+		<a href="{% url edit_plan plan.goal.slug %}">Edit</a>&nbsp;
+		<a href="{% url actions_edit plan.goal.slug %}">Actions</a>&nbsp;
+		<a href="{% url rewards_edit plan.goal.slug %}">Rewards</a>&nbsp;
 		<a href="{% url milestones_edit plan.goal.slug %}">Milestones</a>
 	</li>
 </ul>

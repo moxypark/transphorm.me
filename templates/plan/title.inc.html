@@ -1,0 +1,17 @@
+{% load humanize %}
+<h1>{% spaceless %}
+	<span class="points">{{ plan.points|intcomma }}<span> points</span></span>
+	{% if user and greeting %}
+		{% ifequal user request.user %}
+			{{ greeting|safe }}
+		{% else %}
+			{{ user.get_full_name|default:user.username }}&rsquo;s
+			<span class="goal-name">{{ goal.name }}</span> logbook
+		{% endifequal %}
+	{% else %}
+		{{ user.get_full_name|default:user.username }}&rsquo;s
+		<span class="goal-name">
+			{{ goal.name }}
+		</span> logbook
+	{% endif %}
+{% endspaceless %}</h1>

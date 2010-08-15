@@ -12,14 +12,14 @@ $(document).ready(
 				);
 				
 				val = panel.find('input[type=radio][checked=true]').val();
-				multiplier = panel.find('input[type=text][name$=-points_multiplier]');
+				multiplier = panel.find('select[name$=-measurement]');
 				
 				switch(val) {
-					case 'pa': case 'pi':
+					case 'sa':
 						multiplier.parent().parent().hide();
 						break;
-					case 'ps': case 'ns':
-						multiplier.parent().parent().hide();
+					case 'sc':
+						multiplier.parent().parent().show();
 						break;
 				}
 			}
@@ -32,12 +32,12 @@ $(document).ready(
 					function() {
 						if($(this).attr('checked') == true) {
 							val = $(this).val();
-							multiplier = panel.find('input[type=text][name$=-points_multiplier]');
+							multiplier = panel.find('select[name$=-measurement]');
 							switch(val) {
-								case 'pa': case 'pi':
+								case 'sa':
 									multiplier.parent().parent().slideUp();
 									break;
-								case 'ps': case 'ns':
+								case 'sc':
 									multiplier.parent().parent().slideDown();
 									break;
 							}
@@ -46,5 +46,7 @@ $(document).ready(
 				);
 			}
 		);
+		
+		$('.edit-action').last().find('.panel select[name$=-measurement]').parent().parent().hide();
 	}
 );

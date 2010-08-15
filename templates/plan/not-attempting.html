@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block pre-content %}
+	<h1>Plan not found</h1>
+{% endblock pre-content %}
+
+{% block content %}
+	<p>
+		{{ user.get_full_name|default:user.username }} is not attempting
+		this goal. If they had in the past, they no longer are.
+	</p>
+	
+	{% ifnotequal live_plans.count 0 %}
+		{% for plan in live_plans %}
+			{% include 'profile/plan.inc.html' %}
+		{% endfor %}
+	{% endifnotequal %}
+{% endblock content %}

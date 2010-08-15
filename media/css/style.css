@@ -3,12 +3,12 @@ body {
 }
 
 h1 {
-	letter-spacing: -0.1em; color: #333; padding-top: 0.5em;
+	letter-spacing: -0.09em; color: #333; padding-top: 0.5em;
 	font-family: 'Georgia', 'Times New Roman', serif;
 }
 
 h2 {
-	letter-spacing: -0.1em; color: #333;
+	letter-spacing: -0.07em; color: #333;
 	font-family: 'Georgia', 'Times New Roman', serif;
 }
 
@@ -18,20 +18,68 @@ h2 {
 }
 
 h1 span, h2 span, .intro span { color: #99317A; }
+h1 span.points {
+	color: #99317A; display: block; float: right;
+	margin-left: 0.5em;
+}
+h1 span.points span {
+	font-size: 0.5em; font-family: Arial, Helvetica, sans-serif;
+	letter-spacing: -0.1em; color: #333;
+}
 
 #header { background: #333; color: #bbb; padding: 5px 0 5px 0; }
 #header a { color: #ddd; text-decoration: none; }
 #header a:hover { color: #fff; text-decoration: underline; }
+#header a span { color: #99317A; }
 #content { background: #fff; padding-bottom: 1em; }
-#footer { padding-top: 1em; }
+#footer { padding-top: 1em; padding-bottom: 1em; }
 
 h2, h3, h4, h5, h6, p, address, li { margin: 0.5em 0 0.5em 0; }
 ol, ul { margin: 0.5em 0 0.5em 0.5em; padding: 0; }
+a:link, a:visited { color: #99317A; }
+a:hover { color: #000; }
+
 blockquote { margin: 0.5em 1em 0.5em 1em; }
 
-#start-form label {
+#start-form label, #log-form label {
 	font-family: 'Georgia', 'Times New Roman', serif;
 	font-weight: normal; font-size: 1.5em; 
+}
+
+.unclaimed-rewards {
+	background: #FFF2F7; color: #99317A; padding: 10px;
+}
+
+#log-form { position: relative; }
+#log-form label {
+	float: left; clear: none; width: 60%;
+}
+
+#log-form .log-options {
+	margin: 0; padding: 0; list-style-type: none;
+	float: right; display: inline; position: absolute; right: 0;
+}
+#log-form .log-options li {
+	display: inline-block;
+}
+#log-form .log-options li a {
+	background: #333; color: #fff; padding: 5px;
+	text-decoration: none;
+}
+#log-form .log-options li a:hover { text-decoration: underline; }
+#log-form .log-options li a.selected { background: #99317A; }
+
+#log-form textarea { width: 578px; height: 3em; }
+#log-form select { width: 588px; height: auto; }
+#log-form select.date-field { width: auto; }
+#log-form label[for=id_date] { font-size: 1em; }
+#log-form .error textarea { width: 558px; }
+#log-form .submit { text-align: right; }
+#log-form label[for=id_kind] { font-size: 1em; }
+#log-form label[for=id_kind] label { font-size: 1em; }
+#log-form label[for=id_kind] li {
+	margin: 0 0 1em 0; padding: 5px; list-style-type: none;
+	display: inline-block;
 }
 
 input[type=text], input[type=password],
@@ -44,8 +92,17 @@ input[type=radio], input[type=checkbox] {
 	width: auto; margin-top: -0.5em;
 }
 textarea { height: 6em; }
-input[type=submit] {
-	background: #333; color: #fff; font-size: 1.5em; border-width: 0;
+input[type=submit], a.button {
+	background: #333; color: #fff; border-width: 0;
+}
+a.button { text-decoration: none; padding: 5px; }
+a.button:hover { text-decoration: underline; }
+a.delete { color: #8A1F11; }
+a.delete:hover { color: #000; }
+a.button.delete { background: #8A1F11; color: #fff; }
+a.button.delete:hover { text-decoration: underline; }
+input[type=submit][name=continue] {
+	background: #99317A;
 }
 .error-info { color: #8A1F11; font-weight: bold; margin-top: 0; }
 
@@ -62,7 +119,12 @@ form .field ul {
 	list-style-type: none;
 }
 
-#start-form .field ul label { font-size: 1em; }
+#start-form .field ul label, #log-form .field ul label {
+	font-size: 1em;
+}
+#start-form input[type=submit], #log-form input[type=submit], a.button.claim {
+	font-size: 1.5em; background: #99317A;
+}
 
 #action-form h3, #rewards-form h3, #milestones-form h3 {
 	background: #FFA5DA; border: 1px solid #ccc;
@@ -87,15 +149,34 @@ form .field ul {
 #rewards-form .edit-reward .panel,
 #milestones-form .edit-milestone .panel {
 	padding: 5px; border: 1px solid #ccc; border-top-width: 0;
-	float: left; width: 568px; background: #fff; clear: both;
+	float: left; width: 568px; clear: both;
+	background: #FFF2F7;
 }
 
 #milestones-form .edit-milestone.past h3 { background: #f4f4f4; }
 #milestones-form .edit-milestone.past h3 a { color: #999; }
 
+#log { font-size: 1.25em; }
+
+#log .log-entry { margin-top: 1em; float: left; }
+#log .log-entry .gravatar {
+	width: 50px; display: block; float: left; margin-right: 10px;
+}
+#log .log-entry .body {
+	width: 530px; float: left;
+}
+#log .log-entry .body p {
+	margin: 0 0 0.5em 0;
+}
+#log .log-entry .body p.entry-date {
+	margin-top: -0.5em;
+}
+
+#log .page-links { margin-top: 1em; float: left; }
+#log .page-next { float: left; }
+#log .page-prev { float: right; }
+
 #sidebar h2 { font-size: 1.5em; font-weight: bold; }
 #sidebar ul {
 	margin: 0; padding: 0; list-style-type: none;
 }
-#sidebar a:link, #sidebar a:visited { color: #99317A; }
-#sidebar a:hover { color: #000; }

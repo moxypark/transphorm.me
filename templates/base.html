@@ -13,10 +13,10 @@
 		<div class="wrap" id="header">
 			<div class="container">
 				<div class="span-4">
-					<a class="site-name" href="/">transphorm.me</a>
+					<a class="site-name" href="/">Transphorm<span>.me</span></a>
 				</div>
 				
-				<div class="span-5 prepend-11 last">
+				<div class="span-9 prepend-11 last">
 					{% if request.user.is_authenticated %}
 					Logged in as <a href="{% url profile %}">{{ request.user.username }}</a>
 					|
@@ -35,6 +35,16 @@
 					<div class="success flash">
 						{{ messages|join:'<br />' }}
 					</div>
+				{% endif %}
+				
+				{% if unclaimed_rewards %}
+					{% ifnotequal unclaimed_rewards.count 0 %}
+					<div class="unclaimed-rewards">
+						<p>Congratulations! You can now claim your
+						{% for reward in unclaimed_rewards %}{% if not forloop.first %},{% endif %}{% if forloop.last %} or {% endif %}<a href="{% url rewards_claim reward.plan.goal.slug reward.pk %}">{{ reward }}</a>{% endfor %}
+						</p>
+					</div>
+					{% endifnotequal %}
 				{% endif %}
 				
 				{% block pre-content %}{% endblock %}
@@ -57,6 +67,7 @@
 		
 		{% block javascript %}
 			<script type="text/javascript" src="http://cdn.jquerytools.org/1.2.3/jquery.tools.min.js"></script>
+			<script type="text/javascript" src="{{ MEDIA_URL }}js/functions.js"></script>
 			<script type="text/javascript">
 				setTimeout(
 					function() { 

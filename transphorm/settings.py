@@ -60,9 +60,10 @@ INSTALLED_APPS = (
 	'django.contrib.admin',
 	'django.contrib.humanize',
 	'django.contrib.markup',
-	'transphorm.goals'
+	'transphorm.goals',
+	'transphorm.social'
 )
 
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/profile/'
+LOGIN_REDIRECT_URL = '/profile/latest/'
 AUTH_PROFILE_MODULE = 'goals.Profile'

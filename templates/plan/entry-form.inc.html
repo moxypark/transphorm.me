@@ -1,0 +1,15 @@
+<div id="form{{ forloop.counter }}" class="log-form{% if forloop.first %} first{% endif %}{% if forloop.last %} last{% endif %}">
+	{% for field in form %}
+	<div class="field {% if field.errors %} error{% endif %}{% if forloop.first %} first{% endif %}{% if forloop.last %} last{% endif %}">
+		<label for="id_{{ field.html_name }}">
+			{{ field.label }}
+			{% ifnotequal field.name 'date' %}<br />{% endifnotequal %}
+			{{ field }}
+		</label>
+	</div>
+	{% endfor %}
+	
+	<div class="clear submit">
+		<input class="button positive" name="form{{ forloop.counter }}" type="submit" value="{% ifequal user request.user %}Log it!{% else %}Post comment{% endifequal %}" />
+	</div>
+</div>

@@ -5,7 +5,8 @@ from django import forms
 from django.forms.extras.widgets import SelectDateWidget
 from django.forms.models import modelformset_factory, BaseModelFormSet
 from django.contrib.auth.models import User
-from transphorm.goals.models import Profile, Plan, Goal, Action, Reward, Milestone
+from transphorm.goals.models import Profile, Plan, Goal, Action, Reward, \
+	Milestone, LogEntry, ActionEntry, RewardClaim, Comment
 from transphorm.goals.widgets import RadioSelectWithHelpText
 
 class ProfileForm(forms.ModelForm):
@@ -43,18 +44,16 @@ class ProfileForm(forms.ModelForm):
 	)
 	
 	def clean_password_confirm(self):
-		password = self.cleaned_data['password']
+		password = self.cleaned_data.get('password', None)
 		password_confirm = self.cleaned_data['password_confirm']
 		
-		if password:
-			
-			if password != password_confirm:
-				raise forms.ValidationError('The two passwords don\'t match.')
+		if password and password != password_confirm:
+			raise forms.ValidationError('The two passwords don\'t match.')
 			
 		return password_confirm
 	
 	def clean_username(self):
-		username = self.cleaned_data['username']
+		username = self.cleaned_data.get('username', None)
 		user_id = self.instance.user.pk
 		
 		if User.objects.filter(
@@ -62,7 +61,9 @@ class ProfileForm(forms.ModelForm):
 		).exclude(
 			pk = user_id
 		).count() == 1:
-			raise forms.ValidationError('Sorry, this username is already in use.')
+			raise forms.ValidationError(
+				'Sorry, this username is already in use.'
+			)
 		
 		return username
 	
@@ -76,7 +77,9 @@ class ProfileForm(forms.ModelForm):
 			).exclude(
 				pk = user_id
 			).count() == 1:
-				raise forms.ValidationError('This email address is already in use.')
+				raise forms.ValidationError(
+					'This email address is already in use.'
+				)
 		else:
 			raise forms.ValidationError('This field is required.')
 			
@@ -104,11 +107,12 @@ class ProfileForm(forms.ModelForm):
 	def save(self, commit = True):
 		profile = super(ProfileForm, self).save(commit = False)
 		
-		profile.user.username = self.cleaned_data['username']
+		profile.user.username = self.cleaned_data.get('username', None)
 		profile.user.first_name = self.cleaned_data['first_name']
 		profile.user.last_name = self.cleaned_data['last_name']
 		
-		if not self.cleaned_data['password'] is None and not self.cleaned_data['password'] == '':
+		if not self.cleaned_data['password'] is None and not \
+			self.cleaned_data['password'] == '':
 			profile.user.set_password(
 				self.cleaned_data['password']
 			)
@@ -181,7 +185,11 @@ class PlanForm(forms.ModelForm):
 	
 	def __init__(self, *args, **kwargs):
 		super(PlanForm, self).__init__(*args, **kwargs)
-		self.fields['deadline'].widget = SelectDateWidget()
+		self.fields['deadline'].widget = SelectDateWidget(
+			attrs = {
+				'class': 'date-field future-date'
+			}
+		)
 		
 		if not self.instance.original:
 			del self.fields['live']
@@ -189,8 +197,8 @@ class PlanForm(forms.ModelForm):
 		
 		if not self.instance.goal.has_deadline:
 			self.fields['deadline'].required = False
-			self.fields['deadline'].help_text = """You don&rsquo;t have to set a deadline
-			for this goal, but it can be helpful"""
+			self.fields['deadline'].help_text = """You don&rsquo;t have to
+			set a deadline for this goal, but it can be helpful"""
 	
 	class Meta:
 		model = Plan
@@ -203,13 +211,14 @@ class PlanForm(forms.ModelForm):
 class GoalForm(forms.ModelForm):
 	name = forms.CharField(
 		label = 'Name your goal',
-		help_text = 'It should be in lowercase. Imagine it in a sentence, starting with &ldquo;I want to...&rdquo;'
+		help_text = """It should be in lowercase. Imagine it in a sentence,
+		starting with &ldquo;I want to...&rdquo;"""
 	)
 	
 	description = forms.CharField(
-		label = 'Tell us a bit about your goal',
-		help_text = 'Why is it an important goal for you and others to try and achieve?',
-		widget = forms.Textarea
+		label = 'Tell us a bit about your goal', widget = forms.Textarea,
+		help_text = """Why is it an important goal for you and others to
+		try and achieve?""",
 	)
 	
 	has_deadline = forms.BooleanField(
@@ -220,10 +229,14 @@ class GoalForm(forms.ModelForm):
 	def clean_name(self):
 		name = self.cleaned_data['name']
 		if name[0].isupper():
-			raise forms.ValidationError('Please don\'t start with a capital letter.')
+			raise forms.ValidationError(
+				'Please don\'t start with a capital letter.'
+			)
 		
 		if name.lower().startswith('i want to'):
-			raise forms.ValidationError('Please don\'t start with the phrase \'I want to\'.')
+			raise forms.ValidationError(
+				"Please don\'t start with the phrase 'I want to'."
+			)
 		
 		return name
 	
@@ -294,62 +307,71 @@ class SignupForm(forms.ModelForm):
 		super(SignupForm, self).__init__(*args, **kwargs)
 		self.fields['dob'].widget = SelectDateWidget(
 			years = years, attrs = {
-				'class': 'date-field'
+				'class': 'date-field past-date'
 			}
 		)
 		self.fields['dob'].label = 'Date of birth'
 		self.fields['dob'].required = False
-		self.fields['dob'].help_text = 'This is optional, and isn&rsquo;t shared with anyone'
+		self.fields['dob'].help_text = """This is optional, and
+		isn&rsquo;t shared with anyone"""
 	
 	def clean_password_confirm(self):
-		create_account = self.cleaned_data['create_account'] == 'True'
+		create_account = self.cleaned_data.get('create_account') == 'True'
 		password_confirm = self.cleaned_data['password_confirm']
 		
 		if create_account:
-			password = self.cleaned_data['password']
+			password = self.cleaned_data.get('password', None)
 			
 			if password != password_confirm:
-				raise forms.ValidationError('The two passwords don\'t match.')
+				raise forms.ValidationError(
+					'The two passwords don\'t match.'
+				)
 			
 		return password_confirm
 	
 	def clean_username(self):
-		create_account = self.cleaned_data['create_account'] == 'True'
-		username = self.cleaned_data['username']
+		create_account = self.cleaned_data.get('create_account') == 'True'
+		username = self.cleaned_data.get('username', None)
 		
 		if create_account:
 			if User.objects.filter(username__iexact = username).count() == 1:
-				raise forms.ValidationError('Sorry, this username is already in use.')
+				raise forms.ValidationError(
+					'Sorry, this username is already in use.'
+				)
 			
 		return username
 	
 	def clean_email(self):
-		create_account = self.cleaned_data['create_account'] == 'True'
+		create_account = self.cleaned_data.get('create_account') == 'True'
 		email = self.cleaned_data['email']
 		
 		if create_account:
 			if email:
 				if User.objects.filter(email__iexact = email).count() == 1:
-					raise forms.ValidationError('This email address is already in use.')
+					raise forms.ValidationError(
+						'This email address is already in use.'
+					)
 			else:
 				raise forms.ValidationError('This field is required.')
 			
 		return email
 	
 	def clean_email_confirm(self):
-		create_account = self.cleaned_data['create_account'] == 'True'
+		create_account = self.cleaned_data.get('create_account') == 'True'
 		email_confirm = self.cleaned_data.get('email_confirm')
 		
 		if create_account:
 			email = self.cleaned_data.get('email')
 			
 			if email != email_confirm:
-				raise forms.ValidationError('The two email addresses don\'t match.')
+				raise forms.ValidationError(
+					'The two email addresses don\'t match.'
+				)
 		
 		return email_confirm
 	
 	def clean(self):
-		create_account = self.cleaned_data['create_account'] == 'True'
+		create_account = self.cleaned_data.get('create_account') == 'True'
 		if not create_account:
 			from django.contrib.auth import authenticate
 			
@@ -359,16 +381,19 @@ class SignupForm(forms.ModelForm):
 			)
 			
 			if not user:
-				raise forms.ValidationError('Please enter a correct username and password. Note that both fields are case-sensitive.')
+				raise forms.ValidationError(
+					"""Please enter a correct username and password.
+					Note that both fields are case-sensitive."""
+				)
 			
 			self.user = user
 		
 		return self.cleaned_data
 	
 	def save(self, commit = True):
-		create_account = self.cleaned_data['create_account'] == 'True'
-		username = self.cleaned_data['username']
-		password = self.cleaned_data['password']
+		create_account = self.cleaned_data.get('create_account') == 'True'
+		username = self.cleaned_data.get('username', None)
+		password = self.cleaned_data.get('password', None)
 		
 		if create_account:
 			user = User.objects.create_user(
@@ -419,10 +444,10 @@ class SignupForm(forms.ModelForm):
 
 class ActionForm(forms.ModelForm):
 	ACTION_HELP = (
-		'Something simple and positive, that adds a fixed number of points to your total (eg: walked to work).',
-		'Something simple and negative, which deducts a fixed number of points from your total (eg: had a cigarette).',
-		'The more you do something positive, the more points you get (eg: walked <em>x</em> miles today).',
-		'The less you do something negative, the more points you get (eg: ate <em>x</em> unhealthy meales in a week).'
+		"""Something simple, that adds or deducts a fixed number of
+		points to or from your total (eg: walked to work).""",
+		"""The more you do something, the more points you get
+		(eg: walked <em>x</em> miles today).""",
 	)
 	
 	def __init__(self, *args, **kwargs):
@@ -433,7 +458,7 @@ class ActionForm(forms.ModelForm):
 			choice_help_text = self.ACTION_HELP
 		)
 		
-		self.fields['points_multiplier'].required = False
+		self.fields['measurement'].required = False
 	
 	class Meta:
 		model = Action
@@ -498,7 +523,7 @@ class MilestoneForm(forms.ModelForm):
 		super(MilestoneForm, self).__init__(*args, **kwargs)
 		self.fields['deadline'].widget = SelectDateWidget(
 			attrs = {
-				'class': 'date-field'
+				'class': 'date-field future-date'
 			}
 		)
 	
@@ -529,3 +554,95 @@ MilestoneFormSet = modelformset_factory(
 	Milestone, form = MilestoneForm, formset = BaseMilestoneFormSet,
 	can_delete = True
 )
+
+class LogEntryForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(LogEntryForm, self).__init__(*args, **kwargs)
+		if 'body' in self.fields:
+			self.fields['body'].label = 'How are you doing?'
+	
+	class Meta:
+		model = LogEntry
+		
+		exclude = (
+			'plan'
+		)
+		
+		fields = (
+			'body',
+		)
+	
+	class Media:
+		js = ('js/log-entry-form.js',)
+
+class CommentForm(LogEntryForm):
+	def __init__(self, *args, **kwargs):
+		super(CommentForm, self).__init__(*args, **kwargs)
+		self.fields['body'].label = 'What would you like to say?'
+
+	class Meta:
+		model = Comment
+		exclude = (
+			'plan',
+			'kind',
+			'date'
+		)
+	
+	class Media:
+		js = ('js/comment-form.js',)
+
+class RewardClaimForm(LogEntryForm):
+	def __init__(self, *args, **kwargs):
+		super(RewardClaimForm, self).__init__(*args, **kwargs)
+		self.fields['reward'].label = 'What reward would you like to claim?'
+	
+	class Meta:
+		model = RewardClaim
+		exclude = (
+			'plan',
+			'kind',
+			'body'
+		)
+
+class ActionEntryForm(LogEntryForm):
+	def __init__(self, *args, **kwargs):
+		super(ActionEntryForm, self).__init__(*args, **kwargs)
+		self.fields['action'].label = 'What have you done today?'
+		self.fields['value'].required = False
+		
+		self.fields['date'].widget = SelectDateWidget(
+			attrs = {
+				'class': 'date-field past-dates'
+			}
+		)
+	
+	def save(self, commit = True):
+		entry = super(ActionEntryForm, self).save(commit = False)
+		
+		# A bit of a hack. We don't want users to have to bother with
+		# entering the timem for their log entries, but we want them to
+		# display in the order we created them. If the below isn't done,
+		# they'll display in a seemingly random order.
+		
+		from datetime import date, datetime
+		if self.cleaned_data['date'].date() == date.today():
+			entry.date = datetime.now()
+		
+		if commit:
+			entry.save()
+		
+		return entry
+	
+	class Meta:
+		model = ActionEntry
+		exclude = (
+			'plan',
+			'kind',
+			'body'
+		)
+		
+		fields = (
+			'action',
+			'value',
+			'date'
+		)

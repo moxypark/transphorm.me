@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block pre-content %}
+	<div class="span-15">
+		{% include 'plan/title.inc.html' %}
+	</div>
+{% endblock pre-content %}
+
+{% block content %}
+	<div id="log">
+		<hr />
+		<h2>{{ entry.get_kind_display }} for <span>{{ entry.plan.goal }}</strong></h2>
+		{% include 'plan/entry.inc.html' %}
+		
+		{% ifequal entry.kind 'a' %}
+			<p>
+				This is worth <strong>{{ entry.actionentry.action.points|intcomma }}
+				point{{ entry.actionentry.action.points|pluralize }}</strong>
+				{% if entry.actionentry.action.measurement %}
+				per {{ entry.actionentry.action.get_measurement_display }}
+				{% endif %}
+			</p>
+			<hr />
+		{% endifequal %}
+		
+		{% if can_delete %}
+			<div class="clear"></div>
+			<p>
+				<a class="button delete" href="{% url plan_logbook_entry_delete plan.goal.slug plan.user.username entry.pk %}">Delete this entry</a>
+				{% ifequal entry.kind 'a' %}
+				Deleting this entry will deduct
+				<strong>{{ entry.actionentry.action.points }} points</strong>
+				from your total
+				{% endifequal %}
+			</p>
+		{% endif %}
+		
+		<hr />
+		
+		<p>
+			Back to <a href="{{ plan.get_absolute_url }}">{{ plan.user.get_full_name|default:plan.user.username }}&rsquo;s plan</a>
+		</p>
+	</div>
+{% endblock content %}

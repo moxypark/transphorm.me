@@ -1,0 +1,23 @@
+{% load markup %}
+
+<h2>
+	{{ plan.user.first_name|default:plan.user.username }}
+	is trying to <a href="{{ plan.get_absolute_url }}">{{ plan.goal }}</a>
+</h2>
+
+{{ plan.about|markdown }}
+
+{% with plan.log_entries.latest as entry %}
+	{% if entry %}
+		<p>
+			<small>{% spaceless %}
+				Latest activity: {{ entry.date|timesince }} ago by
+				{% if entry.is_comment %}
+					{{ entry.name }}
+				{% else %}
+					{{ entry.plan.user.get_full_name|default:entry.plan.user.username }}
+				{% endif %}
+			{% endspaceless %}</small>
+		</p>
+	{% endif %}
+{% endwith %}

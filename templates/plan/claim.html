@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block pre-content %}
+	<h1>Claim your <span>{{ reward.name }}</span></h1>
+{% endblock pre-content %}
+
+{% block content %}
+	<p class="intro">
+		Well done {{ request.user.first_name|default:request.user.username }},
+		you&rsquo;ve racked up
+		<span>{{ reward.plan.points_unclaimed|intcomma }}</span>
+		points in your <span>{{ reward.plan.goal.name }}</span> plan, so why
+		not treat yourself?
+	</p>
+	
+	<a class="button positive claim" href="{% url rewards_claim_confirm reward.plan.goal.slug reward.pk %}">Claim your <span>{{ reward.name }}</span></a>
+	{% if reward.webpage %}
+	and then <a href="{{ reward.webpage }}?next={{ next }}" rel="external">Go and get it</a>!
+	{% endif %}
+	<p>
+		Claiming rewards doesn&rsquo;t deduct anything from your total, and
+		it makes you feel <em>good</em>!
+	</p>
+{% endblock content %}

@@ -1,0 +1,26 @@
+{% load markup gravatar %}
+
+<div class="log-entry">
+	<img src="{% ifequal entry.kind 'c' %}{{ entry.comment.email|gravatar }}{% else %}{{ entry.plan.user.email|gravatar }}{% endifequal %}" alt="{{ entry.plan.user }}" class="gravatar" />
+	<div class="body">
+		{{ entry.body|markdown }}
+		<p class="entry-date">
+			<small>{% spaceless %}
+				<a href="{{ entry.get_absolute_url }}">{{ entry.date|date:'jS M' }}</a>, by
+				{% ifequal entry.kind 'c' %}
+					{% if entry.comment.website %}
+						<a href="{{ entry.comment.website }}" rel="external">{{ entry.comment.name }}</a>
+					{% else %}
+						{{ entry.comment.name }}
+					{% endif %}
+				{% else %}
+					{% if user_profile.website %}
+						<a href="{{ user_profile.website }}" rel="external">{{ user.get_full_name|default:user.username }}</a>
+					{% else %}
+						{{ user.get_full_name|default:user.username }}
+					{% endif %}
+				{% endifequal %}
+			{% endspaceless %}</small>
+		</p>
+	</div>
+</div>

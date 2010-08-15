@@ -13,6 +13,12 @@
 		which you can then use to reward yourself. These are called
 		<span>actions</span>, and you can set them up below.
 	</p>
+	
+	<p>
+		Remember, you&rsquo;re just creating the options you&rsquo;ll use
+		later on when logging your progress; you haven&rsquo;t actually
+		started logging it yet.
+	</p>
 	{% endif %}
 	
 	<hr />
@@ -54,6 +60,20 @@
 						</div>
 						{% endifnotequal %}
 					{% endfor %}
+					
+					{% if forloop.last %}
+						<h4>Feeling clever?</h4>
+						<p>
+							If you select the <strong>Scale</strong> option
+							and select a measurement, you can change the
+							<strong>action name</strong> to incorporate the
+							value you enter when you come to log it. For
+							example, if you enter &ldquo;walked [value]
+							[measurement]&rdquo;, when you log that
+							action, your logbook will say, for example:
+							&ldquo;I walked <em>5 miles</em>&rdquo;.
+						</p>
+					{% endif %}
 					
 					{{ form.hidden_fields|join:'' }}
 				</div>

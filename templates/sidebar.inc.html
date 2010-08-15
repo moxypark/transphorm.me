@@ -3,8 +3,8 @@
 <ul>
 	{% for plan in latest_plans %}
 	<li>
-		<strong>{{ plan.user.get_full_name|default:plan.user.username }}</strong>
-		wants to <strong>{{ plan.goal.name }}</strong>
+		<a href="{% url user_profile plan.user.username %}">{{ plan.user.get_full_name|default:plan.user.username }}</a>
+		wants to <a href="{{ plan.get_absolute_url }}">{{ plan.goal.name }}</a>
 	</li>
 	{% endfor %}
 </ul>
