@@ -14,6 +14,7 @@ from transphorm.goals.models import Profile, Goal, Plan, LogEntry, Comment, Rewa
 
 from transphorm.goals import helpers
 from transphorm.goals.decorators import *
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 GREETINGS = (
@@ -493,6 +494,7 @@ def milestones_edit(request, *args, **kwargs):
 	)
 
 @plan_view()
+@never_cache
 def plan_logbook(request, *args, **kwargs):
 	goal = args[0]
 	plan = args[1]
@@ -521,7 +523,13 @@ def plan_logbook(request, *args, **kwargs):
 	
 	elif request.user.is_authenticated():
 		for form_class in (ActionEntryForm, LogEntryForm):
-			forms.append(form_class())
+			forms.append(
+				form_class(
+					instance = form_class._meta.model(
+						plan = plan
+					)
+				)
+			)
 		
 		action = reverse('plan_logbook_add', args = [goal.slug])
 		extra_context.update(

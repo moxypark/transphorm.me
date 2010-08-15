@@ -1,4 +1,4 @@
-Transphorm
 Django==1.2.1
 akismet==0.2.0
-Markdown=2.0.3
+Markdown==2.0.3
+pygooglechart==0.3.0

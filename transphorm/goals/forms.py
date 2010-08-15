@@ -610,6 +610,9 @@ class ActionEntryForm(LogEntryForm):
 	def __init__(self, *args, **kwargs):
 		super(ActionEntryForm, self).__init__(*args, **kwargs)
 		self.fields['action'].label = 'What have you done today?'
+		self.fields['action'].queryset = self.fields['action'].queryset.filter(
+			plan = self.instance.plan
+		)
 		self.fields['value'].required = False
 		
 		self.fields['date'].widget = SelectDateWidget(
