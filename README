@@ -25,3 +25,16 @@ DEVELOPMENT FEATURES
 - Google Charts integration, to show progress in a visual form
 - Privacy controls: profiles can be made private, so the member can track
   their progress without any other members seeing their content
+
+INSTALLATION
+============
+
+$ pip install -r requirements.txt
+
+That should install the necessary Python libraries (Django [of course],
+Markdown, pygooglechart and a graphics library called Grapefruit).
+
+Copy settings_local.py.sample to settings_local.py, and rig up your
+database. Everything works fine with SQLite.
+
+Share and enjoy.
