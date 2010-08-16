@@ -8,7 +8,7 @@ from transphorm.goals.managers import GoalManager, RewardManager, \
 from datetime import date, datetime, timedelta
 
 POINT_CHOICES = tuple([(x, str(x)) for x in range(-100, 110, 10)])
-AVAILABLE_POINT_CHOICES = tuple([(x, str(x)) for x in range(20, 10100, 100)])
+AVAILABLE_POINT_CHOICES = tuple([(x, str(x)) for x in range(10, 10100, 100)])
 MEASUREMENTS = (
 	('in', 'inch', 'inches', 'inches'),
 	('yd', 'yard', 'yards', 'yards'),
