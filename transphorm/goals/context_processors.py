@@ -5,6 +5,7 @@ def goals(request):
 	from transphorm.goals.models import Plan, Profile, Reward, LogEntry
 	from transphorm.goals.forms import StartForm
 	from django.db.models import Q
+	from django.conf import settings
 	
 	context = {
 		'latest_plans': Plan.objects.filter(
@@ -32,5 +33,7 @@ def goals(request):
 		context['unclaimed_rewards'] = Reward.objects.unclaimed(
 			request.user
 		)
+	
+	context['GA_ACCOUNT_ID'] = getattr(settings, 'GA_ACCOUNT_ID', None)
 	
 	return context
