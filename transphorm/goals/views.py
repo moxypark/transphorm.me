@@ -769,7 +769,7 @@ def plan_comment_add(request, *args, **kwargs):
 	if form.is_valid():
 		comment = form.save(commit = False)
 		comment.ip = request.META.get('REMOTE_ADDR')
-		comment.user_agent = request.META.get('USER_AGENT')
+		comment.user_agent = request.META.get('HTTP_USER_AGENT')
 		comment.save()
 		
 		return HttpResponseRedirect(
