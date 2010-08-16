@@ -88,7 +88,8 @@ def start(request):
 		{
 			'goal': goal,
 			'action': action,
-			'forms': forms
+			'forms': forms,
+			'meta_title': (goal.name,)
 		},
 		RequestContext(request)
 	)
@@ -160,7 +161,8 @@ def new_goal(request):
 		'start.html',
 		{
 			'forms': forms,
-			'goal': goal
+			'goal': goal,
+			'meta_title': (goal.name,)
 		},
 		RequestContext(request)
 	)
@@ -250,7 +252,8 @@ def start_plan(request, goal):
 			'next': reverse(
 				'actions_edit',
 				args = [plan.goal.slug]
-			)
+			),
+			'meta_title': (goal.name,)
 		},
 		RequestContext(request)
 	)
@@ -272,6 +275,7 @@ def profile(request, username = None):
 			)
 		
 		context['profile'] = profile
+		context['meta_title'] = ('%s\'s profile' % profile.user.username,)
 		action = 'view'
 	elif request.user.is_authenticated():
 		try:
@@ -288,8 +292,13 @@ def profile(request, username = None):
 				request.user.message_set.create(
 					message = 'Your profile has been updated.'
 				)
+				
+				return HttpResponseRedirect(
+					reverse('profile_latest')
+				)
 
 		context['profile_form'] = form
+		context['meta_title'] = ('Your profile',)
 		action = 'edit'
 	else:
 		from django.conf import settings
@@ -304,14 +313,15 @@ def profile(request, username = None):
 		context,
 		RequestContext(request)
 	)
-	
+
 def users(request):
 	return render_to_response(
 		'members.html',
 		{
 			'members': Profile.objects.filter(
 				public = True
-			)[:10]
+			)[:10],
+			'meta_title': ('New members',)
 		},
 		RequestContext(request)
 	)
@@ -345,6 +355,7 @@ def edit_plan(request, *args, **kwargs):
 			'goal': goal,
 			'plan': plan,
 			'next': next,
+			'meta_title': ('Edit your %s plan' % goal.name,)
 		},
 		RequestContext(request)
 	)
@@ -391,7 +402,8 @@ def actions_edit(request, *args, **kwargs):
 			'plan': plan,
 			'formset': formset,
 			'next': next,
-			'is_wizard': is_wizard
+			'is_wizard': is_wizard,
+			'meta_title': ('Manage your %s actions' % goal.name,)
 		},
 		RequestContext(request)
 	)
@@ -437,7 +449,8 @@ def rewards_edit(request, *args, **kwargs):
 			'plan': plan,
 			'formset': formset,
 			'next': next,
-			'is_wizard': is_wizard
+			'is_wizard': is_wizard,
+			'meta_title': ('Manage your %s rewards' % goal.name,)
 		},
 		RequestContext(request)
 	)
@@ -475,7 +488,8 @@ def rewards_claim(request, *args, **kwargs):
 			'reward': reward,
 			'next': request.GET.get('next', request.META.get('HTTP_REFERER')),
 			'unclaimed_rewards': None,
-			'plan': plan
+			'plan': plan,
+			'meta_title': ('Claim your %s' % reward.name,)
 		},
 		RequestContext(request)
 	)
@@ -486,10 +500,13 @@ def milestones_edit(request, *args, **kwargs):
 	goal = args[0]
 	plan = args[1]
 	
-	is_wizard = plan.milestones.count() == 0
-	next = request.REQUEST.get(
-		'next', reverse('plan_logbook', args = [goal.slug])
-	)
+	try:
+		profile = request.user.get_profile()
+		is_wizard = not profile.user.first_name or not profile.user.last_name
+	except Profile.DoesNotExist:
+		is_wizard = True
+	
+	next = request.REQUEST.get('next', reverse('profile'))
 	
 	if request.method == 'GET':
 		formset = MilestoneFormSet(plan = plan)
@@ -515,7 +532,8 @@ def milestones_edit(request, *args, **kwargs):
 			'plan': plan,
 			'formset': formset,
 			'next': next,
-			'is_wizard': is_wizard
+			'is_wizard': is_wizard,
+			'meta_title': ('Edit your %s milestones' % goal.name,)
 		},
 		RequestContext(request)
 	)
@@ -547,6 +565,12 @@ def plan_logbook(request, *args, **kwargs):
 				goal.slug, plan.user.username
 			]
 		)
+		
+		extra_context['meta_title'] = (
+			'%s\'s %s logbook' % (
+				plan.user.username, goal.name
+			)
+		)
 	
 	elif request.user.is_authenticated():
 		for form_class in (ActionEntryForm, LogEntryForm):
@@ -563,7 +587,10 @@ def plan_logbook(request, *args, **kwargs):
 			{
 				'actions_serialized': helpers.serialise_actions(plan),
 				'measurements_serialized': helpers.serialise_measurements(),
-				'greeting': helpers.get_greeting(request)
+				'greeting': helpers.get_greeting(request),
+				'meta_title': (
+					'%s\'s %s logbook' % (plan.user.username, goal.name)
+				)
 			}
 		)
 	else:
@@ -708,7 +735,8 @@ def plan_logbook_entry(request, *args, **kwargs):
 			'plan': plan,
 			'goal': goal,
 			'can_delete': can_delete,
-			'profile': profile
+			'profile': profile,
+			'meta_title': (entry.body, plan.user.username, goal.name)
 		},
 		RequestContext(request)
 	)

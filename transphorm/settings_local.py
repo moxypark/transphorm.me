@@ -5,10 +5,10 @@ from os import path
 
 DATABASES = {
 	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': 'transphorm.sql',
-		'USER': '',
-		'PASSWORD': '',
+		'ENGINE': 'django.db.backends.mysql',
+		'NAME': 'transphorm',
+		'USER': 'transphorm',
+		'PASSWORD': 'iy4gkbV7JPwe40hj',
 		'HOST': '',
 		'PORT': '',
 	}

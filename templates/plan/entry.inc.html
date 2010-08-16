@@ -14,20 +14,20 @@
 						{{ entry.comment.name }}
 					{% endif %}
 				{% else %}
-					{% if user_profile.website %}
-						<a href="{{ user_profile.website }}" rel="external">{{ user.get_full_name|default:user.username }}</a>
+					{% if entry.plan.user.profile.website %}
+						<a href="{{ entry.plan.user.profile.website }}" rel="external">{{ entry.plan.user.get_full_name|default:entry.plan.user.username }}</a>
 					{% else %}
-						{{ user.get_full_name|default:user.username }}
+						{{ entry.plan.user.get_full_name|default:entry.plan.user.username }}
 					{% endif %}
 				{% endifequal %}
 			{% endspaceless %}
 			
 			{% if not solo %}
-			{% ifequal plan.user request.user %}
+			{% ifequal entry.plan.user request.user %}
 				{% if entry.kind == 'c' and not entry.comment.is_approved %}
-					| <a class="approve" href="{% url plan_logbook_entry_approve plan.goal.slug plan.user.username entry.pk %}">Approve</a>
+					| <a class="approve" href="{% url plan_logbook_entry_approve entry.plan.goal.slug entry.plan.user.username entry.pk %}">Approve</a>
 				{% endif %}
-				| <a class="delete" href="{% url plan_logbook_entry_delete plan.goal.slug plan.user.username entry.pk %}">Delete</a>
+				| <a class="delete" href="{% url plan_logbook_entry_delete entry.plan.goal.slug entry.plan.user.username entry.pk %}">Delete</a>
 			{% endifequal %}
 			{% endif %}
 			</small>

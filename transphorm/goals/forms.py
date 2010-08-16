@@ -19,7 +19,8 @@ class ProfileForm(forms.ModelForm):
 	)
 	
 	username = forms.RegexField(
-		regex = r'^[a-z0-9]+$'
+		regex = r'^[a-z0-9]+$',
+		help_text = 'Only lowercase letters and numbers are valid.'
 	)
 	
 	password = forms.CharField(
@@ -39,7 +40,8 @@ class ProfileForm(forms.ModelForm):
 	)
 	
 	twitter = forms.RegexField(
-		regex = r'^[a-z0-9_]+$',
+		label = 'Twitter username',
+		regex = r'^[a-zA-Z0-9_]+$',
 		required = False
 	)
 	
@@ -267,7 +269,8 @@ class SignupForm(forms.ModelForm):
 	)
 	
 	username = forms.RegexField(
-		regex = r'^[a-z0-9]+$'
+		regex = r'^[a-z0-9]+$',
+		help_text = 'Only lowercase letters and numbers are valid.'
 	)
 	
 	password = forms.CharField(
