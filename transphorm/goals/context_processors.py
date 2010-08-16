@@ -16,7 +16,7 @@ def goals(request):
 		
 		'latest_log_entries': LogEntry.objects.filter(
 			Q(plan__user__profile__public = True) | Q(plan__user__profile__isnull = True)
-		).filter(plan__live = True)[:10]
+		).filter(plan__live = True).approved()[:10]
 	}
 	
 	if request.GET.get('msg'):
