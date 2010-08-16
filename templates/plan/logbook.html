@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load goalcharts %}
 
 {% block pre-content %}
 	<div class="span-15">
@@ -21,6 +22,41 @@
 			<strong>Make my profile public</strong> option in your
 			<a href="{% url profile %}">profile</a>.
 		</p>
+		
+		{% if next_milestone %}
+			<div id="next-milestone"{% if not next_milestone.will_reach %} class="warning"{% endif %}>
+				<p>
+					{% ifnotequal next_milestone.points_remaining 0 %}
+						You are <strong>{{ next_milestone.points_remaining }}
+						point{{ next_milestone.points_remaining|pluralize }}</strong>
+						away from meeting your milestone in
+						<strong>{{ next_milestone.deadline|timeuntil }}</strong>
+					{% else %}
+						It looks like you&rsquo;re going to hit your milestone
+						in <strong>{{ next_milestone.deadline|timeuntil }}</strong>.
+						Well done!
+					{% endifnotequal %}
+				</p>
+			</div>
+		{% else %}
+			<div id="next-milestone" class="warning">
+				<p>
+					You don&rsquo;t have any upcoming milestones. Would you
+					like to set some?
+				</p>
+				
+				<p>
+					<small>
+						Setting realistic targets will help to boost you along
+						to achieving your goal and claiming your rewards.
+					</small>
+				</p>
+				
+				<p>
+					<a class="positive" href="{% url milestones_edit plan.goal.slug %}">Set some new milestones</a>
+				</p>
+			</div>
+		{% endif %}
 	{% else %}
 		<p class="intro">
 			This is <span>{{ user.get_full_name|default:user.username }}</span>&rsquo;s
@@ -28,6 +64,9 @@
 			an encouraging comment below.
 		</p>
 	{% endifequal %}
+	
+	<hr />
+	{% actions_chart plan 590 100 '99317A' 'yes' %}
 	
 	<form id="log-form" method="post" action="{{ action }}">
 		{% load content_info %}

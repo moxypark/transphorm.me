@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from django.contrib import admin
-from transphorm.goals.models import Profile, Goal, Plan, Action, Reward, Milestone, LogEntry, Comment, RewardClaim
+from transphorm.goals.models import Profile, Goal, Plan, Action, Reward, Milestone, LogEntry, Comment, RewardClaim, UserEmail
 
 class ProfileAdmin(admin.ModelAdmin):
 	list_display = (
@@ -28,3 +28,4 @@ admin.site.register(RewardClaim)
 admin.site.register(Milestone)
 admin.site.register(LogEntry)
 admin.site.register(Comment)
+admin.site.register(UserEmail)

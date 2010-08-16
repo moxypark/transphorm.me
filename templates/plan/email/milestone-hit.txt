@@ -1,0 +1,19 @@
+Congratulations {{ user.first_name|default:user.username }}, you've hit your {{ milestone.name }} milestone!
+
+{% if unclaimed_rewards %}
+Why not go and claim one of your rewards? You've earned them. Go to http://{{ site.domain }}{% url plan_logbook plan.goal.slug %}
+and indulge yourself.
+{% else %}
+You should setup some rewards at http://{{ site.domain }}{% url rewards_edit plan.goal.slug %}.
+You've earned it!
+{% endif %}
+
+{% if next_milestone %}Your next milestone is in {{ next_milestone.deadline|timeuntil }}.
+Good luck!
+{% else %}
+You don't have any more milestones setup. You can set them up at
+http://{{ site.domain }}{% url milestones_edit plan.goal.slug %}
+{% endif %}
+
+Best regards,  
+The Transphorm team

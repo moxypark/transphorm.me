@@ -11,6 +11,12 @@ def action_post_save(sender, **kwargs):
 		instance.plan.points += instance.points_value()
 		instance.plan.points_unclaimed += instance.points_value()
 		instance.plan.save()
+		
+	from django.core.cache import cache
+	cache_key = 'chart_%s' % instance.plan.pk
+	cache.delete(cache_key)
+	
+	print 'Deleted chart cache'
 post_save.connect(action_post_save, sender = ActionEntry)
 
 def action_post_delete(sender, **kwargs):
@@ -19,6 +25,10 @@ def action_post_delete(sender, **kwargs):
 	instance.plan.points -= instance.points_value()
 	instance.plan.points_unclaimed -= instance.points_value()
 	instance.plan.save()
+	
+	from django.core.cache import cache
+	cache_key = 'chart_%s' % instance.plan.pk
+	cache.delete(cache_key)
 post_delete.connect(action_post_delete, sender = ActionEntry)
 
 def comment_post_save(sender, **kwargs):

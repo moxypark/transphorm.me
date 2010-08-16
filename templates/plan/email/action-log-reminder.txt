@@ -1,0 +1,8 @@
+Hi {{ user.first_name|default:user.username }}!
+
+Have you updated your {{ plan.goal.name }} logbook for today? Just go to
+http://{{ site.domain }}{% url plan_logbook plan.goal.slug %} and enter your
+actions for the day, to build up your points.
+
+Thanks!  
+The Transphorm team

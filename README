@@ -1,0 +1,27 @@
+TRANSPHORM.ME
+=============
+
+Transphorm.me is an online community that helps members make changes to their
+lives, and keep track of them in a rewards-driven programme.
+
+Friends and relatives can offer encouragement and comment through the member's
+Logbook, which the member is asked to update, with frequent emails.
+
+Members can create milestones to help keep them focused, and setup rewards to
+keep them motivated.
+
+The site works on a system of "goals", ie: "stop smoking". A new user picks a
+goal from the dropdown list on the homepage. If one doesn't already exist, they
+can create one by typing in its name, then filling in some more details, along
+with a username and password (which they create on the same form).
+
+DEVELOPMENT FEATURES
+====================
+
+- Sophisticated and simple signup process
+- User is guided through setting up their goal
+- Nightly cron job to email members when required
+- Anti-spam safeguards
+- Google Charts integration, to show progress in a visual form
+- Privacy controls: profiles can be made private, so the member can track
+  their progress without any other members seeing their content

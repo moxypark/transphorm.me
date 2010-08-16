@@ -16,7 +16,12 @@
 					<a class="site-name" href="/">Transphorm<span>.me</span></a>
 				</div>
 				
-				<div class="span-9 prepend-11 last">
+				<div class="span-10">
+					<a href="/">Home</a> |
+					<a href="{% url users %}">New members</a>
+				</div>
+				
+				<div class="span-9 prepend-1 last">
 					{% if request.user.is_authenticated %}
 					Logged in as <a href="{% url profile %}">{{ request.user.username }}</a>
 					|
@@ -67,7 +72,11 @@
 		
 		<div class="wrap" id="footer">
 			<div class="container">
-				<p>&copy; {% now "Y" %} <a href="http://moxypark.co.uk" rel="external">Moxy Park</a> | Originally built for <a href="http://djangodash.com" rel="external">Django Dash</a></p>
+				<p>
+					&copy; {% now "Y" %} <a href="http://moxypark.co.uk" rel="external">Moxy Park</a> |
+					Powered by <a href="http://djangoproject.com" rel="external">Django</a> and
+					built for <a href="http://djangodash.com" rel="external">Django Dash</a> 2010.
+				</p>
 			</div>
 		</div>
 		

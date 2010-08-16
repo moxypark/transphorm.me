@@ -52,6 +52,9 @@ class Profile(models.Model):
 	
 	def __unicode__(self):
 		return self.user.get_full_name() or self.user.username
+	
+	class Meta:
+		ordering = ('-user__date_joined',)
 
 class Goal(models.Model):
 	user = models.ForeignKey(User, related_name = 'goals')
@@ -68,6 +71,9 @@ class Goal(models.Model):
 	has_deadline = models.BooleanField('has a deadline')
 	live = models.BooleanField(default = True)
 	objects = GoalManager()
+	
+	def original_plan(self):
+		return self.plans.get(original__isnull = True, live = True)
 	
 	def save(self, *args, **kwargs):
 		if not self.slug:
@@ -127,8 +133,39 @@ class Plan(models.Model):
 			[self.goal.slug, self.user.username]
 		)
 	
-	def copy(self, dest_user):
-		raise NotImplemented('Method not implemented.')
+	def copy_to(self, dest_plan):
+		if dest_plan.goal != self.goal:
+			raise Exception('Destination goal is different from source goal')
+		
+		dest_plan.actions.all().delete()
+		dest_plan.rewards.all().delete()
+		dest_plan.milestones.all().delete()
+		
+		for action in self.actions.all():
+			dest_plan.actions.create(
+				kind = action.kind,
+				name = action.name,
+				measurement = action.measurement,
+				points = action.points,
+				description = action.description
+			)
+			
+			print 'Copied action'
+		
+		for milestone in self.milestones.all():
+			deadline = date.today() + timedelta(
+				(
+					milestone.deadline - self.started.date()
+				).days
+			)
+			
+			dest_plan.milestones.create(
+				name = milestone.name,
+				deadline = deadline,
+				points = milestone.points
+			)
+			
+			print 'Copied milestone'
 	
 	class Meta:
 		ordering = ('-started',)
@@ -239,10 +276,27 @@ class Milestone(models.Model):
 	
 	@property
 	def past(self):
-		return self.deadline < date.today()
+		return self.deadline <= date.today()
+	
+	def points_remaining(self):
+		return self.points - self.plan.points
+	
+	def will_reach(self):
+		return self.points_remaining() < self.plan.points
 	
 	def __unicode__(self):
 		return self.name
+	
+	def save(self, *args, **kwargs):
+		if self.pk:
+			old = Milestone.objects.get(pk = self.pk)
+			if self.deadline > old.deadline:
+				self.reached = None
+			
+			if not old.reached:
+				self.hits.create()
+		
+		super(Milestone, self).save(*args, **kwargs)
 	
 	class Meta:
 		ordering = ('deadline',)
@@ -364,6 +418,11 @@ class MilestoneHit(LogEntry):
 	def __init__(self, *args, **kwargs):
 		super(MilestoneHit, self).__init__(*args, **kwargs)
 		self.kind = 'm'
+	
+	def save(self, *args, **kwargs):
+		self.body = 'I hit my %s milestone!' % self.milestone.name
+		self.plan = self.milestone.plan
+		super(MilestoneHit, self).save(*args, **kwargs)
 
 class Comment(LogEntry):
 	name = models.CharField(max_length = 50)
@@ -404,5 +463,97 @@ class Comment(LogEntry):
 				print 'Comment is NOT spam'
 		
 		super(Comment, self).save(*args, **kwargs)
+
+class UserEmail(models.Model):
+	plan = models.ForeignKey(Plan, related_name = 'emails')
+	subject = models.CharField(max_length = 255)
+	body = models.TextField()
+	date = models.DateTimeField(auto_now_add = True)
+	deleted = models.BooleanField()
+	kind = models.CharField(
+		max_length = 2, choices = (
+			('ar', 'Time to update your logbook'),
+			('mr', 'A milestone reminder'),
+			('mh', 'Congratulations! You hit your milestone'),
+			('mm', 'Comiserations, you missed your milestone this time'),
+		)
+	)
+	
+	def __unicode__(self):
+		return self.subject
+	
+	def save(self, *args, **kwargs):
+		if not self.pk:
+			self.subject = self.get_kind_display()
 		
+		super(UserEmail, self).save(*args, **kwargs)
+	
+	def prepare_message(self, site, **kwargs):
+		from django.core.mail import EmailMultiAlternatives
+		from django.conf import settings
+		from django.template.loader import render_to_string
+		
+		if self.kind == 'ar':
+			template = 'plan/email/action-log-reminder.txt'
+		elif self.kind == 'mr':
+			template = 'plan/email/milestone-reminder.txt'
+		elif self.kind == 'mh':
+			template = 'plan/email/milestone-hit.txt'
+		elif self.kind == 'mm':
+			template = 'plan/email/milestone-miss.txt'
+		
+		milestones = self.plan.milestones.filter(
+			deadline__gt = datetime.now(),
+			reached__isnull = True
+		)[:1]
+		
+		if milestones.count() > 0:
+			next_milestone = milestones[0]
+		else:
+			next_milestone = None
+		
+		unclaimed_rewards = self.plan.rewards.unclaimed(self.plan.user)
+		if unclaimed_rewards.count() == 0:
+			unclaimed_rewards = None
+		
+		context = {
+			'plan': self.plan,
+			'user': self.plan.user,
+			'site': site,
+			'unclaimed_rewards': unclaimed_rewards,
+			'next_milestone': next_milestone
+		}
+		
+		context.update(kwargs)
+		
+		body = render_to_string(
+			template,
+			context
+		)
+		
+		html_content = render_to_string(
+			'plan/email/base.html',
+			{
+				'body': body,
+				'site': site
+			}
+		)
+		
+		message = EmailMultiAlternatives(
+			self.subject,
+			self.body,
+			getattr(settings, 'DEFAULT_FROM_EMAIL'),
+			[self.plan.user.email],
+		)
+		
+		message.attach_alternative(
+			html_content, 'text/html'
+		)
+		
+		return message
+	
+	class Meta:
+		ordering = ('-date',)
+		get_latest_by = 'date'
+
 from transphorm.goals.management import *

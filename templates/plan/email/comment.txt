@@ -10,3 +10,6 @@ Website: {{ comment.website }}
 
 You can view the comment at
 http://{{ site.domain }}{{ comment.get_absolute_url }}
+
+Thanks,  
+The Transphorm team

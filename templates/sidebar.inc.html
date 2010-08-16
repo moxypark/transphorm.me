@@ -5,6 +5,9 @@
 	<li>
 		<a href="{% url user_profile plan.user.username %}">{{ plan.user.get_full_name|default:plan.user.username }}</a>
 		wants to <a href="{{ plan.get_absolute_url }}">{{ plan.goal.name }}</a>
+		{% if plan.deadline %}
+		by {{ plan.deadline|date:'F j, Y' }}
+		{% endif %}
 	</li>
 	{% endfor %}
 </ul>

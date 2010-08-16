@@ -1,4 +1,7 @@
+{% load goalcharts %}
+
 <h2>Your plan to <span>{{ plan.goal }}</span></h2>
+<a href="{{ plan.get_absolute_url }}">{% actions_chart plan 350 50 '99317A' %}</a>
 
 <ul>
 	<li>

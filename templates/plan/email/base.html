@@ -1,0 +1,45 @@
+{% load markup %}
+<div style="background: #f4f4f4;">
+	<table cellpadding="0" cellspacing="0" width="550" align="center" style="background: #fff;">
+		<tr style="background: #333;">
+			<td>
+				<table cellpadding="5" align="left">
+					<tr>
+						<td>
+							<span style="font-family: Arial, Helvetica, sans-serif; font-size: 1em;"><span style="color: #fff; ">transphorm</span><span style="color: #99317A;">.me</span></span>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	
+		<tr style="font-family: Arial, Helvetica, sans-serif; font-size: 1em;">
+			<td>
+				<table cellpadding="5" align="left">
+					<tr>
+						<td>
+							{{ body|urlize|markdown }}<br />&nbsp;
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	
+		<tr style="background: #eee;">
+			<td style="font-family: Arial, Helvetica, sans-serif; font-size: 0.5em; color: #999;">
+				<table cellpadding="5" align="left">
+					<tr>
+						<td>
+							<p>
+								You can manage your email subscriptions by logging into your
+								profile at http://{{ site.domain }}{% url profile %}. If you
+								can&rsquo;t find out how to unsubscribe, please email
+								<a href="mailto:moxypark@me.com">moxypark@me.com</a>.
+							</p>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</div>

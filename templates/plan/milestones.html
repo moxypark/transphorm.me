@@ -21,7 +21,7 @@
 	
 	<Form id="milestones-form" method="post" action="{{ action }}">
 		{% for form in formset.forms %}
-			<div class="edit-milestone{% if forloop.last %} last{% endif %}{% if form.instance.past %} past{% endif %}">
+			<div class="edit-milestone{% if forloop.last %} last{% endif %}{% if form.instance.past %} past{% endif %}{% if form.instance.reached %} reached{% endif %}">
 				<h3>{% spaceless %}
 				{% if form.instance.pk %}
 					<a href="javascript:;">

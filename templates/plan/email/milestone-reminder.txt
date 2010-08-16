@@ -1,0 +1,12 @@
+Hi {{ user.first_name|default:user.username }}!
+
+This is just a friendly reminder to let you know that you have a milestone
+coming up in a few days.
+
+{{ milestone.name }} is due in {{ milestone.deadline|timeuntil }}{% ifnotequal milestone.points_remaining 0 %},
+and you still need to attain {{ milestone.points_remaining }}
+more point{{ milestone.points_remaining|pluralize }}, so keep at it!{% else %},
+and it looks like you're on track. Well done you!{% endifnotequal %}
+
+Thanks!  
+The Transphorm team

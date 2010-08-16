@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load gravatar %}
+
+{% block pre-content %}
+	<h2>Fellow transphormers</h2>
+{% endblock pre-content %}
+
+{% block content %}
+	<p class="intro">
+		Here are some of the new people using <span>transphorm.me</span> to try
+		and change something in their life, and share their experiences with
+		friends.
+	</p>
+	
+	<div id="members">
+		{% for member in members %}
+			<div class="member-profile">
+				<img class="gravatar" src="{{ member.user.email|gravatar }}" alt="{{ member }}" />
+				<div class="body">
+					<h3>{{ member }}</h3>
+					
+					<p>
+						{{ member.user.first_name|default:member.user.username }}
+						is trying to
+						{% for plan in member.live_plans %}
+							<a href="{{ plan.get_absolute_url }}">{{ plan.goal }}</a>{% if not forloop.last %},{% endif %}
+						{% endfor %}
+					</p>
+					
+					{% if member.twitter or member.website %}
+						<p>
+							Find {{ member.user.first_name|default:member.user.username }}
+							{% if member.twitter %}
+								<a href="http://twitter.com/{{ member.twitter }}/" rel="external">Twitter</a>
+								{% if member.website %}or{% endif %}
+							{% endif %}
+
+							{% if member.website %}
+							at <a href="{{ member.website }}" rel="external">{{ member.website }}</a>
+							{% endif %}
+						</p>
+					{% endif %}
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'sidebar.inc.html' %}
+	<h2>Follow us on Twitter</h2>
+	<p>@<a href="http://twitter.com/transphormme" rel="external">transphormme</a></p>
+{% endblock sidebar %}

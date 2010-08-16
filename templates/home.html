@@ -26,17 +26,18 @@
 		{% endfor %}
 	</form>
 	
-	<p>
-		Sed id leo nunc, sed pellentesque eros. Nunc congue, ligula
-		eget tempor semper, ipsum diam commodo orci, eu condimentum
-		tellus dolor eget nulla. Integer placerat, ante eu porta
-		pharetra, erat libero bibendum nibh, sit amet tincidunt odio
-		ipsum blandit lectus. Praesent accumsan pharetra tincidunt.
-	</p>
+	<div id="log">
+		<h3>Latest updates from members</h3>
+		{% for entry in latest_log_entries %}
+			{% include 'plan/entry.inc.html' %}
+		{% endfor %}
+	</div>
 {% endblock content %}
 
 {% block sidebar %}
 	{% include 'sidebar.inc.html' %}
+	<h2>Follow us on Twitter</h2>
+	<p>@<a href="http://twitter.com/transphormme" rel="external">transphormme</a></p>
 {% endblock sidebar %}
 
 {% block javascript %}

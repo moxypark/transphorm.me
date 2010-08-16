@@ -1,0 +1,15 @@
+Sorry {{ user.first_name|default:user.username }}, you haven't managed to hit your {{ milestone.name }} milestone.
+
+Remember you can get help and support from your friends, and the Transphorm
+community. Just pop back to http://{{ site.domain }} or find us on Twitter,
+at http://twitter.com/transphormme any time you feel like a chat.
+
+{% if next_milestone %}Your next milestone is in {{ next_milestone.deadline|timeuntil }}.
+Here's wishing you loads of luck. Keep at it!
+{% else %}
+Try setting yourself a new, more realistic goal if you're having trouble keeping
+to your current ones. You can do that at http://{{ site.domain }}{% url milestones_edit plan.goal.slug %}
+{% endif %}
+
+Best regards,  
+The Transphorm team

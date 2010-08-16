@@ -30,6 +30,10 @@
 					<label for="id_{{ field.html_name }}">
 					{% if field.name == 'live' or field.name == 'allow_copies' %}
 						{{ field }}&nbsp;{{ field.label }}
+						{% if field.help_text %}
+							<small class="quiet">{{ field.help_text|safe }}</small>
+							<br />
+						{% endif %}
 					{% else %}
 						{{ field.label }}<br />
 						{% if field.help_text %}

@@ -4,7 +4,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.core.urlresolvers import reverse
 from transphorm.goals.forms import ProfileForm, StartForm, PlanForm, \
 	GoalForm, SignupForm, ActionFormSet, RewardFormSet, MilestoneFormSet, \
@@ -208,11 +208,24 @@ def start_plan(request, goal):
 			return HttpResponseRedirect(
 				reverse('edit_plan', args = [goal.slug])
 			)
-		
+	
 	plan = Plan(
 		goal = goal,
 		user = request.user
 	)
+	
+	try:
+		plan.original = goal.original_plan()	
+	except Plan.DoesNotExist:
+		pass
+	
+	from datetime import date, timedelta
+	if plan.original and plan.original.deadline:
+		plan.deadline = date.today() + timedelta(
+			(
+				plan.original.deadline - plan.original.started.date()
+			).days
+		)
 	
 	if request.method == 'GET':
 		form = PlanForm(instance = plan)
@@ -291,6 +304,17 @@ def profile(request, username = None):
 		context,
 		RequestContext(request)
 	)
+	
+def users(request):
+	return render_to_response(
+		'members.html',
+		{
+			'members': Profile.objects.filter(
+				public = True
+			)[:10]
+		},
+		RequestContext(request)
+	)
 
 @login_required
 @plan_view(edit = True)
@@ -331,8 +355,11 @@ def actions_edit(request, *args, **kwargs):
 	goal = args[0]
 	plan = args[1]
 	
-	if plan.actions.count() == 0:
+	if plan.rewards.count() == 0:
 		next = reverse('rewards_edit', args = [goal.slug])
+		is_wizard = True
+	elif plan.milestones.count() == 0:
+		next = reverse('milestones_edit', args = [goal.slug])
 		is_wizard = True
 	else:
 		is_wizard = False
@@ -376,7 +403,7 @@ def rewards_edit(request, *args, **kwargs):
 	plan = args[1]
 	
 	is_wizard = False
-	if plan.rewards.count() == 0:
+	if plan.milestones.count() == 0:
 		is_wizard = True
 		next = request.REQUEST.get(
 			'next', reverse('milestones_edit', args = [goal.slug])
@@ -574,8 +601,21 @@ def plan_logbook(request, *args, **kwargs):
 				gender = 'they'
 		except Profile.DoesNotExist:
 			raise Http404()
+		
+		next_milestone = None
 	else:
+		from datetime import datetime
 		gender = None
+		
+		milestones = plan.milestones.filter(
+			deadline__gt = datetime.now(),
+			reached__isnull = True
+		)[:1]
+		
+		if milestones.count() > 0:
+			next_milestone = milestones[0]
+		else:
+			next_milestone = None
 	
 	extra_context.update(
 		{
@@ -585,6 +625,7 @@ def plan_logbook(request, *args, **kwargs):
 			'entries': entries,
 			'user': plan.user,
 			'gender': gender,
+			'next_milestone': next_milestone,
 			'action': action
 		}
 	)
@@ -764,3 +805,18 @@ def profile_latest(request):
 		return HttpResponseRedirect(
 			reverse('profile')
 		)
+
+def cron(request):
+	if request.META.get('REMOTE_HOST') == '':
+		if request.GET.get('date'):
+			from datetime import datetime
+			fake_date = datetime(*
+				[int(i) for i in request.GET.get('date').split('-')]
+			)
+		else:
+			fake_date = None
+		
+		log = helpers.cron(fake_date)
+		return HttpResponse('\n'.join(log), mimetype = 'text/plain')
+	else:
+		return Http404()

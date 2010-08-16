@@ -179,10 +179,6 @@ class StartForm(forms.Form):
 		js = ('js/start-form.js',)
 
 class PlanForm(forms.ModelForm):
-	live = forms.BooleanField(
-		label = 'I\'m still working on this goal'
-	)
-	
 	def __init__(self, *args, **kwargs):
 		super(PlanForm, self).__init__(*args, **kwargs)
 		self.fields['deadline'].widget = SelectDateWidget(
@@ -192,20 +188,35 @@ class PlanForm(forms.ModelForm):
 		)
 		
 		if not self.instance.original:
-			del self.fields['live']
 			del self.fields['allow_copies']
+		else:
+			self.fields['allow_copies'].help_text = """Allow other people
+			to attempt this goal aswell as you."""
 		
 		if not self.instance.goal.has_deadline:
 			self.fields['deadline'].required = False
 			self.fields['deadline'].help_text = """You don&rsquo;t have to
-			set a deadline for this goal, but it can be helpful"""
+				set a deadline for this goal, but it can be helpful"""
+	
+	def save(self, commit = True):
+		plan = super(PlanForm, self).save(commit = False)
+		
+		if not plan.pk:
+			plan.save()
+			original_plan = plan.goal.original_plan()
+			original_plan.copy_to(plan)
+		elif commit:
+			plan.save()
+		
+		return plan
 	
 	class Meta:
 		model = Plan
 		exclude = (
 			'goal',
 			'user',
-			'original'
+			'original',
+			'live'
 		)
 
 class GoalForm(forms.ModelForm):
@@ -620,6 +631,13 @@ class ActionEntryForm(LogEntryForm):
 				'class': 'date-field past-dates'
 			}
 		)
+	
+	def clean_date(self):
+		date = self.cleaned_data['date']
+		if date > date.today():
+			raise forms.ValidationError('Choose a date in the past.')
+		
+		return date
 	
 	def save(self, commit = True):
 		entry = super(ActionEntryForm, self).save(commit = False)
